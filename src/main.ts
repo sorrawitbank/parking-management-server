@@ -1,28 +1,30 @@
 import {
   BadRequestException,
   ClassSerializerInterceptor,
-  HttpStatus,
   INestApplication,
   ValidationPipe,
 } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
+import toScreamingSnake from './utils/to-screaming-snake';
 
 function registerGlobals(app: INestApplication) {
   app.useGlobalPipes(
     new ValidationPipe({
       exceptionFactory: (errors) => {
-        const fields = errors.map((error) => error.property);
-        const message = errors
-          .flatMap((error) => Object.values(error.constraints ?? {}))
-          .map((m) => m.slice(0, 1).toUpperCase() + m.slice(1))
-          .join('. ');
-        return new BadRequestException({
-          message,
-          fields,
-          error: 'Bad Request',
-          statusCode: HttpStatus.BAD_REQUEST,
-        });
+        const messages = errors.flatMap((error) =>
+          Object.values(error.constraints ?? {}).map(
+            (constraint) => `${toScreamingSnake(error.property)}_${constraint}`,
+          ),
+        );
+        const fields = errors.reduce(
+          (prev, curr) => ({
+            ...prev,
+            [curr.property]: Object.values(curr.constraints ?? {})[0],
+          }),
+          {},
+        );
+        return new BadRequestException({ messages, fields });
       },
       forbidNonWhitelisted: true,
       transform: true,
