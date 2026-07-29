@@ -3,12 +3,12 @@ import ErrorType from '../error-type';
 import toScreamingSnake from '../../../utils/to-screaming-snake';
 
 /**
- * Throw a conflict exception with the properties and the error type
+ * Return a conflict exception with the properties and the error type
  *
  * @param properties - The properties that already exist
  * @returns A conflict exception with the properties and the error type
  */
-function throwAlreadyExists(properties: string | string[]) {
+function AlreadyExists(properties: string | string[]) {
   const messages =
     typeof properties === 'string'
       ? [`${toScreamingSnake(properties)}_${ErrorType.ALREADY_EXISTS}`]
@@ -25,7 +25,7 @@ function throwAlreadyExists(properties: string | string[]) {
           (prev, curr) => ({ ...prev, [curr]: ErrorType.ALREADY_EXISTS }),
           {},
         );
-  throw new ConflictException({ messages, fields });
+  return new ConflictException({ messages, fields });
 }
 
-export default throwAlreadyExists;
+export default AlreadyExists;

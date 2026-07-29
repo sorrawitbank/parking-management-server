@@ -1,3 +1,3 @@
-export { default as throwAlreadyExists } from './throw-already-exists';
-export { default as throwNotFound } from './throw-not-found';
-export { default as throwRequired } from './throw-required';
+export { default as AlreadyExists } from './already-exists';
+export { default as NotFound } from './not-found';
+export { default as Required } from './required';

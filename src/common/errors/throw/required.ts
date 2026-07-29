@@ -2,12 +2,13 @@ import { BadRequestException } from '@nestjs/common';
 import ErrorType from '../error-type';
 import toScreamingSnake from '../../../utils/to-screaming-snake';
 
-/** Throw a bad request exception with the properties and the error type */
 /**
+ * Return a bad request exception with the properties and the error type
+ *
  * @param properties - The properties that are required
  * @returns A bad request exception with the properties and the error type
  */
-function throwRequired(properties: string | string[]) {
+function Required(properties: string | string[]) {
   const messages =
     typeof properties === 'string'
       ? [`${toScreamingSnake(properties)}_${ErrorType.REQUIRED}`]
@@ -23,7 +24,7 @@ function throwRequired(properties: string | string[]) {
           (prev, curr) => ({ ...prev, [curr]: ErrorType.REQUIRED }),
           {},
         );
-  throw new BadRequestException({ messages, fields });
+  return new BadRequestException({ messages, fields });
 }
 
-export default throwRequired;
+export default Required;
