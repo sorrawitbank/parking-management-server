@@ -1,5 +1,6 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
+import { NotFound } from '../../common/errors/throw';
 import DATABASE_CONNECTION from '../../database/database-connection';
 import { vehicleBrands } from '../../database/database.schemas';
 import type Database from '../../database/types/database';
@@ -18,7 +19,7 @@ export class BrandsService {
     });
 
     if (!vehicleBrand) {
-      throw new NotFoundException('Vehicle Brand Not Found');
+      throw NotFound('vehicleBrand');
     }
 
     return vehicleBrand;
