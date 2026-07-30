@@ -11,6 +11,7 @@ import {
 import { plainToInstance } from 'class-transformer';
 import { CreateTenantResponseDto } from './dto/create-tenant-response.dto';
 import { CreateTenantDto } from './dto/create-tenant.dto';
+import { GetTenantResponseDto } from './dto/get-tenant-response.dto';
 import { GetTenantsQueryDto } from './dto/get-tenants-query.dto';
 import { GetTenantsResponseDto } from './dto/get-tenants-response.dto';
 import { TenantIdDto } from './dto/tenant-id.dto';
@@ -33,6 +34,15 @@ export class TenantsController {
       data: plainToInstance(TenantResponseDto, tenants),
       pagination,
     };
+  }
+
+  @Get(':tenantId')
+  async getTenantById(
+    @Param() params: TenantIdDto,
+  ): Promise<GetTenantResponseDto> {
+    const tenant = await this.tenantsService.getTenantById(params.tenantId);
+
+    return plainToInstance(GetTenantResponseDto, tenant);
   }
 
   @Post()

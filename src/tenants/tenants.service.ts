@@ -44,6 +44,18 @@ export class TenantsService {
     };
   }
 
+  async getTenantById(tenantId: string) {
+    const tenant = await this.db.query.tenants.findFirst({
+      where: eq(tenants.tenantId, tenantId),
+    });
+
+    if (!tenant) {
+      throw NotFound('tenant');
+    }
+
+    return tenant;
+  }
+
   async createTenant(tenant: typeof tenants.$inferInsert) {
     await this.validateTenantUniqueFields(tenant.phone, tenant.lineId);
 
