@@ -1,5 +1,6 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
+import { NotFound } from '../../common/errors/throw';
 import DATABASE_CONNECTION from '../../database/database-connection';
 import { vehicleTypes } from '../../database/database.schemas';
 import type Database from '../../database/types/database';
@@ -18,7 +19,7 @@ export class TypesService {
     });
 
     if (!vehicleType) {
-      throw new NotFoundException('Vehicle Type Not Found');
+      throw NotFound('vehicleType');
     }
 
     return vehicleType;
