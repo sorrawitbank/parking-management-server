@@ -1,17 +1,11 @@
-import {
-  ConflictException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { and, count, eq, ilike, ne, or, SQL } from 'drizzle-orm';
+import { Inject, Injectable } from '@nestjs/common';
+import { and, asc, count, desc, eq, ilike, ne, or, SQL } from 'drizzle-orm';
 import { GetTenantsQueryDto } from './dto/get-tenants-query.dto';
 import { PaginationMetaDto } from '../common/dto/pagination-meta.dto';
+import { AlreadyExists, NotFound, Required } from '../common/errors/throw';
 import DATABASE_CONNECTION from '../database/database-connection';
 import { rentingTenants, tenants } from '../database/database.schemas';
 import type Database from '../database/types/database';
-import formatArray from '../utils/format-array';
 
 @Injectable()
 export class TenantsService {
@@ -34,6 +28,7 @@ export class TenantsService {
         .select()
         .from(fromClause)
         .where(whereClause)
+        .orderBy(desc(fromClause.updatedAt), asc(fromClause.tenantId))
         .limit(query.limit)
         .offset(query.offset),
       this.db.select({ total: count() }).from(fromClause).where(whereClause),
@@ -64,6 +59,10 @@ export class TenantsService {
     tenantId: string,
     tenant: Partial<typeof tenants.$inferInsert>,
   ) {
+    if (Object.keys(tenant).length === 0) {
+      throw Required('body');
+    }
+
     await this.validateTenantUniqueFields(
       tenant.phone,
       tenant.lineId,
@@ -76,8 +75,8 @@ export class TenantsService {
       .where(eq(tenants.tenantId, tenantId))
       .returning();
 
-    if (!updatedTenant.length) {
-      throw new NotFoundException('Tenant Not Found');
+    if (updatedTenant.length === 0) {
+      throw NotFound('tenant');
     }
 
     return updatedTenant[0];
@@ -89,8 +88,8 @@ export class TenantsService {
       .where(eq(tenants.tenantId, tenantId))
       .returning();
 
-    if (!deletedTenant.length) {
-      throw new NotFoundException('Tenant Not Found');
+    if (deletedTenant.length === 0) {
+      throw NotFound('tenant');
     }
   }
 
@@ -99,7 +98,23 @@ export class TenantsService {
     lineId?: string | null,
     excludeTenantId?: string,
   ) {
-    const conditions: SQL[] = [];
+    if (!phone && !lineId) {
+      return;
+    }
+
+    const conditions: (SQL | undefined)[] = [];
+    const uniqueFields = [
+      {
+        field: 'phone',
+        key: 'phone',
+        value: phone,
+      },
+      {
+        field: 'lineId',
+        key: 'lineId',
+        value: lineId,
+      },
+    ] as const;
 
     if (phone) {
       conditions.push(eq(tenants.phone, phone));
@@ -109,49 +124,23 @@ export class TenantsService {
       conditions.push(eq(tenants.lineId, lineId));
     }
 
-    if (conditions.length === 0) {
-      return;
-    }
-
-    const whereClause = and(
-      or(...conditions),
-      excludeTenantId ? ne(tenants.tenantId, excludeTenantId) : undefined,
-    );
+    const whereClause = excludeTenantId
+      ? and(ne(tenants.tenantId, excludeTenantId), or(...conditions))
+      : or(...conditions);
 
     const existingTenants = await this.db.query.tenants.findMany({
       where: whereClause,
     });
 
-    const uniqueFields = [
-      {
-        field: 'phone',
-        label: 'Phone number',
-        value: phone,
-      },
-      {
-        field: 'lineId',
-        label: 'Line ID',
-        value: lineId,
-      },
-    ] as const;
-
     const conflicts = uniqueFields.filter(
-      ({ field, value }) =>
-        value && existingTenants.some((tenant) => tenant[field] === value),
+      ({ key, value }) =>
+        value && existingTenants.some((tenant) => tenant[key] === value),
     );
 
     if (conflicts.length > 0) {
       const fields = conflicts.map((item) => item.field);
-      const labels = conflicts.map((item) => item.label);
 
-      throw new ConflictException({
-        message: `${formatArray(labels)} already ${
-          labels.length === 1 ? 'exists' : 'exist'
-        }`,
-        fields,
-        error: 'Conflict',
-        statusCode: HttpStatus.CONFLICT,
-      });
+      throw AlreadyExists(fields);
     }
   }
 }
