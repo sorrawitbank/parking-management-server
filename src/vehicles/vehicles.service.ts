@@ -358,7 +358,7 @@ export class VehiclesService {
     });
 
     if (fields.length > 0) {
-      throw NotFound(fields);
+      throw NotFound(...fields);
     }
   }
 
@@ -426,7 +426,7 @@ export class VehiclesService {
         .filter(({ value }) => !value)
         .map((field) => field.field);
 
-      throw Required(fields);
+      throw Required(...fields);
     }
 
     const whereClause = excludeVehicleId
@@ -445,7 +445,7 @@ export class VehiclesService {
     if (conflicts.length > 0) {
       const fields = conflicts.map((item) => item.field);
 
-      throw AlreadyExists(fields);
+      throw AlreadyExists(...fields);
     }
   }
 }

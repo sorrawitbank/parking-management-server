@@ -157,7 +157,7 @@ export class TenantsService {
     if (conflicts.length > 0) {
       const fields = conflicts.map((item) => item.field);
 
-      throw AlreadyExists(fields);
+      throw AlreadyExists(...fields);
     }
   }
 }

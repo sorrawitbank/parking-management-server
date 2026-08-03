@@ -8,23 +8,14 @@ import toScreamingSnake from '../../../utils/to-screaming-snake';
  * @param properties - The properties that already exist
  * @returns A conflict exception with the properties and the error type
  */
-function AlreadyExists(properties: string | string[]) {
-  const messages =
-    typeof properties === 'string'
-      ? [`${toScreamingSnake(properties)}_${ErrorType.ALREADY_EXISTS}`]
-      : properties.map(
-          (property) =>
-            `${toScreamingSnake(property)}_${ErrorType.ALREADY_EXISTS}`,
-        );
-  const fields =
-    typeof properties === 'string'
-      ? {
-          [properties]: ErrorType.ALREADY_EXISTS,
-        }
-      : properties.reduce(
-          (prev, curr) => ({ ...prev, [curr]: ErrorType.ALREADY_EXISTS }),
-          {},
-        );
+function AlreadyExists(...properties: string[]) {
+  const messages = properties.map(
+    (property) => `${toScreamingSnake(property)}_${ErrorType.ALREADY_EXISTS}`,
+  );
+  const fields = properties.reduce(
+    (prev, curr) => ({ ...prev, [curr]: ErrorType.ALREADY_EXISTS }),
+    {},
+  );
   return new ConflictException({ messages, fields });
 }
 

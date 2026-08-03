@@ -8,22 +8,14 @@ import toScreamingSnake from '../../../utils/to-screaming-snake';
  * @param properties - The properties that are not found
  * @returns A not found exception with the properties and the error type
  */
-function NotFound(properties: string | string[]) {
-  const messages =
-    typeof properties === 'string'
-      ? [`${toScreamingSnake(properties)}_${ErrorType.NOT_FOUND}`]
-      : properties.map(
-          (property) => `${toScreamingSnake(property)}_${ErrorType.NOT_FOUND}`,
-        );
-  const fields =
-    typeof properties === 'string'
-      ? {
-          [properties]: ErrorType.NOT_FOUND,
-        }
-      : properties.reduce(
-          (prev, curr) => ({ ...prev, [curr]: ErrorType.NOT_FOUND }),
-          {},
-        );
+function NotFound(...properties: string[]) {
+  const messages = properties.map(
+    (property) => `${toScreamingSnake(property)}_${ErrorType.NOT_FOUND}`,
+  );
+  const fields = properties.reduce(
+    (prev, curr) => ({ ...prev, [curr]: ErrorType.NOT_FOUND }),
+    {},
+  );
   return new NotFoundException({ messages, fields });
 }
 
