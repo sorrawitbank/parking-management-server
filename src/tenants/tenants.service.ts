@@ -25,7 +25,12 @@ export class TenantsService {
 
     const [result, total] = await Promise.all([
       this.db
-        .select()
+        .select({
+          tenantId: fromClause.tenantId,
+          name: fromClause.name,
+          phone: fromClause.phone,
+          lineId: fromClause.lineId,
+        })
         .from(fromClause)
         .where(whereClause)
         .orderBy(desc(fromClause.updatedAt), asc(fromClause.tenantId))

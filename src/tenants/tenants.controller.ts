@@ -13,9 +13,11 @@ import { CreateTenantResponseDto } from './dto/create-tenant-response.dto';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { GetTenantResponseDto } from './dto/get-tenant-response.dto';
 import { GetTenantsQueryDto } from './dto/get-tenants-query.dto';
-import { GetTenantsResponseDto } from './dto/get-tenants-response.dto';
+import {
+  GetTenantsResponse,
+  GetTenantsResponseDto,
+} from './dto/get-tenants-response.dto';
 import { TenantIdDto } from './dto/tenant-id.dto';
-import { TenantResponseDto } from './dto/tenant-response.dto';
 import { UpdateTenantResponseDto } from './dto/update-tenant-response.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { TenantsService } from './tenants.service';
@@ -31,7 +33,7 @@ export class TenantsController {
     const { tenants, pagination } = await this.tenantsService.getTenants(query);
 
     return {
-      data: plainToInstance(TenantResponseDto, tenants),
+      data: plainToInstance(GetTenantsResponse, tenants),
       pagination,
     };
   }
