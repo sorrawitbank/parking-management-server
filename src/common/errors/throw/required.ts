@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import ErrorType from '../error-type';
-import toScreamingSnake from '../../../utils/to-screaming-snake';
+import { toScreamingSnake } from '../../../common/utils';
 
 /**
  * Return a bad request exception with the properties and the error type

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import toScreamingSnake from './utils/to-screaming-snake';
+import { toScreamingSnake } from './common/utils';
 
 function registerGlobals(app: INestApplication) {
   app.useGlobalPipes(
