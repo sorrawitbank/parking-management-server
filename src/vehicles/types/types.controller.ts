@@ -3,7 +3,7 @@ import { plainToInstance } from 'class-transformer';
 import { TypeResponseDto } from './dto/type-response.dto';
 import { TypesService } from './types.service';
 
-@Controller('vehicles/types')
+@Controller()
 export class TypesController {
   constructor(private readonly typesService: TypesService) {}
 

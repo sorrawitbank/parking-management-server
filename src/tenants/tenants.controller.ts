@@ -22,7 +22,7 @@ import { UpdateTenantResponseDto } from './dto/update-tenant-response.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { TenantsService } from './tenants.service';
 
-@Controller('tenants')
+@Controller()
 export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 

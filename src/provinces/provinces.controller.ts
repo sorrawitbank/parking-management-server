@@ -3,7 +3,7 @@ import { plainToInstance } from 'class-transformer';
 import { ProvinceResponseDto } from './dto/province-response.dto';
 import { ProvincesService } from './provinces.service';
 
-@Controller('provinces')
+@Controller()
 export class ProvincesController {
   constructor(private readonly provincesService: ProvincesService) {}
 

@@ -22,7 +22,7 @@ import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { VehicleIdDto } from './dto/vehicle-id.dto';
 import { VehiclesService } from './vehicles.service';
 
-@Controller('vehicles')
+@Controller()
 export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}
 
