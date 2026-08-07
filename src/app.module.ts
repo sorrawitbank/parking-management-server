@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { StatusesModule as ParkingSlotStatusesModule } from './parking/slots/statuses/statuses.module';
+import { SlotsModule as ParkingSlotsModule } from './parking/slots/slots.module';
 import { ProvincesModule } from './provinces/provinces.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { BrandsModule as VehicleBrandsModule } from './vehicles/brands/brands.module';
@@ -16,6 +17,7 @@ import { VehiclesModule } from './vehicles/vehicles.module';
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
     ParkingSlotStatusesModule,
+    ParkingSlotsModule,
     ProvincesModule,
     TenantsModule,
     VehicleBrandsModule,
@@ -27,6 +29,7 @@ import { VehiclesModule } from './vehicles/vehicles.module';
         children: [
           {
             path: 'slots',
+            module: ParkingSlotsModule,
             children: [
               {
                 path: 'statuses',
