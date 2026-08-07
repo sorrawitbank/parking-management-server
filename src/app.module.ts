@@ -4,6 +4,7 @@ import { RouterModule } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
+import { StatusesModule as ParkingAssignmentStatusesModule } from './parking/assignments/statuses/statuses.module';
 import { StatusesModule as ParkingSlotStatusesModule } from './parking/slots/statuses/statuses.module';
 import { SlotsModule as ParkingSlotsModule } from './parking/slots/slots.module';
 import { ProvincesModule } from './provinces/provinces.module';
@@ -16,6 +17,7 @@ import { VehiclesModule } from './vehicles/vehicles.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
+    ParkingAssignmentStatusesModule,
     ParkingSlotStatusesModule,
     ParkingSlotsModule,
     ProvincesModule,
@@ -27,6 +29,15 @@ import { VehiclesModule } from './vehicles/vehicles.module';
       {
         path: 'parking',
         children: [
+          {
+            path: 'assignments',
+            children: [
+              {
+                path: 'statuses',
+                module: ParkingAssignmentStatusesModule,
+              },
+            ],
+          },
           {
             path: 'slots',
             module: ParkingSlotsModule,
