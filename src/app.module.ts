@@ -4,29 +4,45 @@ import { RouterModule } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
+import { StatusesModule as ParkingSlotStatusesModule } from './parking/slots/statuses/statuses.module';
 import { ProvincesModule } from './provinces/provinces.module';
 import { TenantsModule } from './tenants/tenants.module';
-import { VehiclesModule } from './vehicles/vehicles.module';
 import { BrandsModule as VehicleBrandsModule } from './vehicles/brands/brands.module';
 import { TypesModule as VehicleTypesModule } from './vehicles/types/types.module';
+import { VehiclesModule } from './vehicles/vehicles.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
-    TenantsModule,
+    ParkingSlotStatusesModule,
     ProvincesModule,
+    TenantsModule,
     VehicleBrandsModule,
     VehicleTypesModule,
     VehiclesModule,
     RouterModule.register([
       {
-        path: 'tenants',
-        module: TenantsModule,
+        path: 'parking',
+        children: [
+          {
+            path: 'slots',
+            children: [
+              {
+                path: 'statuses',
+                module: ParkingSlotStatusesModule,
+              },
+            ],
+          },
+        ],
       },
       {
         path: 'provinces',
         module: ProvincesModule,
+      },
+      {
+        path: 'tenants',
+        module: TenantsModule,
       },
       {
         path: 'vehicles',
