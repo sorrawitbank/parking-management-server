@@ -1,13 +1,13 @@
 import { relations } from 'drizzle-orm/relations';
 import {
-  tenants,
-  vehicles,
-  provinces,
-  vehicleTypes,
-  vehicleBrands,
   parkingAssignments,
   parkingAssignmentSlots,
   parkingSlots,
+  provinces,
+  tenants,
+  vehicleBrands,
+  vehicles,
+  vehicleTypes,
 } from './database.schemas';
 
 export const vehiclesRelations = relations(vehicles, ({ one }) => ({

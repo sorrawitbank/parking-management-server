@@ -97,6 +97,12 @@ export const provinces = pgTable(
     provinceId: integer('province_id').primaryKey().notNull(),
     nameTh: varchar('name_th', { length: 120 }).notNull(),
     nameEn: varchar('name_en', { length: 120 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
   },
   (table) => [
     unique('provinces_name_th_uq').on(table.nameTh),
@@ -121,6 +127,12 @@ export const vehicleTypes = pgTable(
       }),
     nameTh: varchar('name_th', { length: 20 }).notNull(),
     nameEn: varchar('name_en', { length: 20 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
   },
   (table) => [
     unique('vehicle_types_name_th_uq').on(table.nameTh),
@@ -151,6 +163,12 @@ export const vehicleBrands = pgTable(
       }),
     nameTh: varchar('name_th', { length: 100 }).notNull(),
     nameEn: varchar('name_en', { length: 100 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
   },
   (table) => [
     unique('vehicle_brands_name_th_uq').on(table.nameTh),
@@ -286,6 +304,12 @@ export const parkingSlotStatuses = pgTable(
     backgroundColorDark: char('background_color_dark', { length: 7 }).notNull(),
     textColorLight: char('text_color_light', { length: 7 }).notNull(),
     textColorDark: char('text_color_dark', { length: 7 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
   },
   (table) => [
     unique('parking_slot_statuses_name_th_uq').on(table.nameTh),
@@ -372,6 +396,12 @@ export const parkingAssignmentStatuses = pgTable(
     textColorLight: char('text_color_light', { length: 7 }).notNull(),
     textColorDark: char('text_color_dark', { length: 7 }).notNull(),
     monthDiffRange: int4range('month_diff_range').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
   },
   (table) => [
     unique('parking_assignment_statuses_name_th_uq').on(table.nameTh),
@@ -456,13 +486,6 @@ export const parkingSlotsWithStatus = pgView('parking_slots_with_status', {
     .default(sql`uuid_generate_v4()`)
     .primaryKey()
     .notNull(),
-  slotNo: integer('slot_no').notNull(),
-  slotCode: varchar('slot_code', { length: 8 }).notNull(),
-  positionLeft: integer('position_left').notNull(),
-  positionTop: integer('position_top').notNull(),
-  width: integer().default(1).notNull(),
-  height: integer().default(1).notNull(),
-  isUnavailable: boolean('is_unavailable').default(false).notNull(),
   slotStatusId: integer('slot_status_id').notNull(),
   statusTh: varchar('status_th', { length: 100 }).notNull(),
   statusEn: varchar('status_en', { length: 100 }).notNull(),
@@ -477,7 +500,7 @@ export const parkingSlotsWithStatus = pgView('parking_slots_with_status', {
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 }).as(
-  sql`SELECT ps.slot_id, ps.slot_no, ps.slot_code, ps.position_left, ps.position_top, ps.width, ps.height, ps.is_unavailable, psst.slot_status_id, psst.name_th AS status_th, psst.name_en AS status_en, psst.background_color_light, psst.background_color_dark, psst.text_color_light, psst.text_color_dark, ps.created_at, ps.updated_at FROM parking_slots ps JOIN parking_slot_statuses psst ON psst.slot_status_id = CASE WHEN (EXISTS ( SELECT 1 FROM parking_assignment_slots pas WHERE pas.is_active AND pas.slot_id = ps.slot_id)) THEN 2 WHEN NOT ps.is_unavailable THEN 1 ELSE 3 END`,
+  sql`SELECT ps.slot_id, psst.slot_status_id, psst.name_th AS status_th, psst.name_en AS status_en, psst.background_color_light, psst.background_color_dark, psst.text_color_light, psst.text_color_dark, ps.created_at, ps.updated_at FROM parking_slots ps JOIN parking_slot_statuses psst ON psst.slot_status_id = CASE WHEN (EXISTS ( SELECT 1 FROM parking_assignment_slots pas WHERE pas.is_active AND pas.slot_id = ps.slot_id)) THEN 2 WHEN NOT ps.is_unavailable THEN 1 ELSE 3 END`,
 );
 
 export const parkingAssignmentSlotsWithAssignedDays = pgView(

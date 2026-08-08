@@ -10,7 +10,12 @@ export class TypesService {
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
 
   async getVehicleTypes() {
-    return this.db.query.vehicleTypes.findMany();
+    return this.db.query.vehicleTypes.findMany({
+      columns: {
+        createdAt: false,
+        updatedAt: false,
+      },
+    });
   }
 
   async getVehicleTypeById(vehicleTypeId: number) {

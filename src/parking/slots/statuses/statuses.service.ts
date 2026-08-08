@@ -10,7 +10,12 @@ export class StatusesService {
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
 
   async getParkingSlotStatuses() {
-    return this.db.query.parkingSlotStatuses.findMany();
+    return this.db.query.parkingSlotStatuses.findMany({
+      columns: {
+        createdAt: false,
+        updatedAt: false,
+      },
+    });
   }
 
   async getParkingSlotStatusById(slotStatusId: number) {

@@ -10,7 +10,12 @@ export class BrandsService {
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
 
   async getVehicleBrands() {
-    return this.db.query.vehicleBrands.findMany();
+    return this.db.query.vehicleBrands.findMany({
+      columns: {
+        createdAt: false,
+        updatedAt: false,
+      },
+    });
   }
 
   async getVehicleBrandById(vehicleBrandId: number) {

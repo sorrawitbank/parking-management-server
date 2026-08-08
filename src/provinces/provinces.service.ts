@@ -10,7 +10,12 @@ export class ProvincesService {
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
 
   async getProvinces() {
-    return this.db.query.provinces.findMany();
+    return this.db.query.provinces.findMany({
+      columns: {
+        createdAt: false,
+        updatedAt: false,
+      },
+    });
   }
 
   async getProvinceById(provinceId: number) {
