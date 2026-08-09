@@ -13,7 +13,27 @@ export class SlotsService {
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
 
   async getParkingSlots() {
-    return this.db.select().from(parkingSlotsWithStatus);
+    return this.db.query.parkingSlots.findMany({
+      columns: {
+        createdAt: false,
+        updatedAt: false,
+      },
+    });
+  }
+
+  async getParkingSlotsWithStatus() {
+    return this.db
+      .select({
+        slotId: parkingSlotsWithStatus.slotId,
+        slotStatusId: parkingSlotsWithStatus.slotStatusId,
+        statusTh: parkingSlotsWithStatus.statusTh,
+        statusEn: parkingSlotsWithStatus.statusEn,
+        backgroundColorLight: parkingSlotsWithStatus.backgroundColorLight,
+        backgroundColorDark: parkingSlotsWithStatus.backgroundColorDark,
+        textColorLight: parkingSlotsWithStatus.textColorLight,
+        textColorDark: parkingSlotsWithStatus.textColorDark,
+      })
+      .from(parkingSlotsWithStatus);
   }
 
   async getParkingSlotById(slotId: string) {
