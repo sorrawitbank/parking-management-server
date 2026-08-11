@@ -78,9 +78,10 @@ export class VehiclesService {
     const [result, total] = await Promise.all([
       this.db.query.vehicles.findMany({
         columns: {
-          vehicleId: true,
-          licensePlatePrefix: true,
-          licensePlateNumber: true,
+          tenantId: false,
+          note: false,
+          createdAt: false,
+          updatedAt: false,
         },
         where: whereClause,
         with: {
@@ -88,21 +89,6 @@ export class VehiclesService {
             columns: {
               tenantId: true,
               name: true,
-            },
-          },
-          province: {
-            columns: {
-              provinceId: false,
-            },
-          },
-          vehicleType: {
-            columns: {
-              vehicleTypeId: false,
-            },
-          },
-          vehicleBrand: {
-            columns: {
-              vehicleBrandId: false,
             },
           },
         },
@@ -127,9 +113,6 @@ export class VehiclesService {
     const vehicle = await this.db.query.vehicles.findFirst({
       columns: {
         tenantId: false,
-        provinceId: false,
-        vehicleTypeId: false,
-        vehicleBrandId: false,
       },
       where: eq(vehicles.vehicleId, vehicleId),
       with: {
@@ -137,21 +120,6 @@ export class VehiclesService {
           columns: {
             tenantId: true,
             name: true,
-          },
-        },
-        province: {
-          columns: {
-            provinceId: false,
-          },
-        },
-        vehicleType: {
-          columns: {
-            vehicleTypeId: false,
-          },
-        },
-        vehicleBrand: {
-          columns: {
-            vehicleBrandId: false,
           },
         },
       },
@@ -187,9 +155,7 @@ export class VehiclesService {
       return tx.query.vehicles.findFirst({
         columns: {
           tenantId: false,
-          provinceId: false,
-          vehicleTypeId: false,
-          vehicleBrandId: false,
+          updatedAt: false,
         },
         where: eq(vehicles.vehicleId, createdVehicle[0].vehicleId),
         with: {
@@ -197,21 +163,6 @@ export class VehiclesService {
             columns: {
               tenantId: true,
               name: true,
-            },
-          },
-          province: {
-            columns: {
-              provinceId: false,
-            },
-          },
-          vehicleType: {
-            columns: {
-              vehicleTypeId: false,
-            },
-          },
-          vehicleBrand: {
-            columns: {
-              vehicleBrandId: false,
             },
           },
         },
@@ -257,9 +208,7 @@ export class VehiclesService {
       return tx.query.vehicles.findFirst({
         columns: {
           tenantId: false,
-          provinceId: false,
-          vehicleTypeId: false,
-          vehicleBrandId: false,
+          createdAt: false,
         },
         where: eq(vehicles.vehicleId, updatedVehicle[0].vehicleId),
         with: {
@@ -267,21 +216,6 @@ export class VehiclesService {
             columns: {
               tenantId: true,
               name: true,
-            },
-          },
-          province: {
-            columns: {
-              provinceId: false,
-            },
-          },
-          vehicleType: {
-            columns: {
-              vehicleTypeId: false,
-            },
-          },
-          vehicleBrand: {
-            columns: {
-              vehicleBrandId: false,
             },
           },
         },
