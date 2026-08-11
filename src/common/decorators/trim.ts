@@ -6,7 +6,9 @@ import { Transform } from 'class-transformer';
  * @returns The trimmed value of the property
  */
 function Trim() {
-  return Transform(({ value }) => String(value).trim());
+  return Transform(({ value }) =>
+    typeof value === 'string' ? value.trim() : value,
+  );
 }
 
 export default Trim;

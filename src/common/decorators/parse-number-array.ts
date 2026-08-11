@@ -7,9 +7,9 @@ import { Transform } from 'class-transformer';
  * @example '1, 2, 2, 3, 4, 4, 5' => [1, 2, 3, 4, 5]
  */
 function ParseNumberArray() {
-  return Transform(({ value }) => [
-    ...new Set(String(value).split(',').map(Number)),
-  ]);
+  return Transform(({ value }) =>
+    value ? [...new Set(String(value).split(',').map(Number))] : undefined,
+  );
 }
 
 export default ParseNumberArray;
