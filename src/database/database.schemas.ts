@@ -487,20 +487,8 @@ export const parkingSlotsWithStatus = pgView('parking_slots_with_status', {
     .primaryKey()
     .notNull(),
   slotStatusId: integer('slot_status_id').notNull(),
-  statusTh: varchar('status_th', { length: 100 }).notNull(),
-  statusEn: varchar('status_en', { length: 100 }).notNull(),
-  backgroundColorLight: char('background_color_light', { length: 7 }).notNull(),
-  backgroundColorDark: char('background_color_dark', { length: 7 }).notNull(),
-  textColorLight: char('text_color_light', { length: 7 }).notNull(),
-  textColorDark: char('text_color_dark', { length: 7 }).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
 }).as(
-  sql`SELECT ps.slot_id, psst.slot_status_id, psst.name_th AS status_th, psst.name_en AS status_en, psst.background_color_light, psst.background_color_dark, psst.text_color_light, psst.text_color_dark, ps.created_at, ps.updated_at FROM parking_slots ps JOIN parking_slot_statuses psst ON psst.slot_status_id = CASE WHEN (EXISTS ( SELECT 1 FROM parking_assignment_slots pas WHERE pas.is_active AND pas.slot_id = ps.slot_id)) THEN 2 WHEN NOT ps.is_unavailable THEN 1 ELSE 3 END`,
+  sql`SELECT ps.slot_id, psst.slot_status_id FROM parking_slots ps JOIN parking_slot_statuses psst ON psst.slot_status_id = CASE WHEN (EXISTS ( SELECT 1 FROM parking_assignment_slots pas WHERE pas.is_active AND pas.slot_id = ps.slot_id)) THEN 2 WHEN NOT ps.is_unavailable THEN 1 ELSE 3 END`,
 );
 
 export const parkingAssignmentSlotsWithAssignedDays = pgView(
@@ -570,15 +558,9 @@ export const activeParkingAssignments = pgView('active_parking_assignments', {
       cache: 1,
     }),
   slotId: uuid('slot_id').notNull(),
+  assignmentStatusId: integer('assignment_status_id').notNull(),
   paidUntilMonth: date('paid_until_month').notNull(),
   monthlyFee: numeric('monthly_fee', { precision: 6, scale: 2 }).notNull(),
-  assignmentStatusId: integer('assignment_status_id').notNull(),
-  statusTh: varchar('status_th', { length: 100 }).notNull(),
-  statusEn: varchar('status_en', { length: 100 }).notNull(),
-  backgroundColorLight: char('background_color_light', { length: 7 }).notNull(),
-  backgroundColorDark: char('background_color_dark', { length: 7 }).notNull(),
-  textColorLight: char('text_color_light', { length: 7 }).notNull(),
-  textColorDark: char('text_color_dark', { length: 7 }).notNull(),
   assignedDate: date('assigned_date').notNull(),
   assignedDays: integer('assigned_days').notNull(),
   tenantId: uuid('tenant_id').notNull(),
@@ -587,7 +569,7 @@ export const activeParkingAssignments = pgView('active_parking_assignments', {
   lineId: varchar('line_id', { length: 20 }),
   note: varchar({ length: 500 }),
 }).as(
-  sql`SELECT pa.assignment_id, pas.slot_id, pa.paid_until_month, pa.monthly_fee, past.assignment_status_id, past.name_th AS status_th, past.name_en AS status_en, past.background_color_light, past.background_color_dark, past.text_color_light, past.text_color_dark, pa.assigned_date, pa.assigned_days, t.tenant_id, t.name, t.phone, t.line_id, t.note FROM parking_assignments_with_stats pa JOIN parking_assignment_slots pas ON pas.is_active AND pas.assignment_id = pa.assignment_id JOIN parking_assignment_statuses past ON past.month_diff_range @> (12::numeric * EXTRACT(year FROM age(pa.paid_until_month::timestamp with time zone, CURRENT_DATE::timestamp with time zone)) + EXTRACT(month FROM age(pa.paid_until_month::timestamp with time zone, CURRENT_DATE::timestamp with time zone)))::integer JOIN tenants t ON t.tenant_id = pa.tenant_id`,
+  sql`SELECT pa.assignment_id, pas.slot_id, past.assignment_status_id, pa.paid_until_month, pa.monthly_fee, pa.assigned_date, pa.assigned_days, t.tenant_id, t.name, t.phone, t.line_id, t.note FROM parking_assignments_with_stats pa JOIN parking_assignment_slots pas ON pas.is_active AND pas.assignment_id = pa.assignment_id JOIN parking_assignment_statuses past ON past.month_diff_range @> (12::numeric * EXTRACT(year FROM age(pa.paid_until_month::timestamp with time zone, CURRENT_DATE::timestamp with time zone)) + EXTRACT(month FROM age(pa.paid_until_month::timestamp with time zone, CURRENT_DATE::timestamp with time zone)))::integer JOIN tenants t ON t.tenant_id = pa.tenant_id`,
 );
 
 export const rentingTenants = pgView('renting_tenants', {
