@@ -22,18 +22,7 @@ export class SlotsService {
   }
 
   async getParkingSlotsWithStatus() {
-    return this.db
-      .select({
-        slotId: parkingSlotsWithStatus.slotId,
-        slotStatusId: parkingSlotsWithStatus.slotStatusId,
-        statusTh: parkingSlotsWithStatus.statusTh,
-        statusEn: parkingSlotsWithStatus.statusEn,
-        backgroundColorLight: parkingSlotsWithStatus.backgroundColorLight,
-        backgroundColorDark: parkingSlotsWithStatus.backgroundColorDark,
-        textColorLight: parkingSlotsWithStatus.textColorLight,
-        textColorDark: parkingSlotsWithStatus.textColorDark,
-      })
-      .from(parkingSlotsWithStatus);
+    return this.db.select().from(parkingSlotsWithStatus);
   }
 
   async getParkingSlotById(slotId: string) {
