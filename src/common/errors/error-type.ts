@@ -1,15 +1,3 @@
-type Error =
-  | 'REQUIRED'
-  | 'INVALID_TYPE'
-  | 'INVALID_FORMAT'
-  | 'INVALID_LENGTH'
-  | 'TOO_SHORT'
-  | 'TOO_LONG'
-  | 'BELOW_MINIMUM'
-  | 'ABOVE_MAXIMUM'
-  | 'NOT_FOUND'
-  | 'ALREADY_EXISTS';
-
 /**
  * `ERROR_TYPES` - Error types for the validation errors
  *
@@ -24,17 +12,17 @@ type Error =
  * - `NOT_FOUND` - Record not found
  * - `ALREADY_EXISTS` - Value already exists
  */
-const ErrorType: Record<Error, string> = {
-  REQUIRED: 'REQUIRED',
-  INVALID_TYPE: 'INVALID_TYPE',
-  INVALID_FORMAT: 'INVALID_FORMAT',
-  INVALID_LENGTH: 'INVALID_LENGTH',
-  TOO_SHORT: 'TOO_SHORT',
-  TOO_LONG: 'TOO_LONG',
-  BELOW_MINIMUM: 'BELOW_MINIMUM',
-  ABOVE_MAXIMUM: 'ABOVE_MAXIMUM',
-  NOT_FOUND: 'NOT_FOUND',
-  ALREADY_EXISTS: 'ALREADY_EXISTS',
-} as const;
+enum ErrorType {
+  REQUIRED = 'REQUIRED',
+  INVALID_TYPE = 'INVALID_TYPE',
+  INVALID_FORMAT = 'INVALID_FORMAT',
+  INVALID_LENGTH = 'INVALID_LENGTH',
+  TOO_SHORT = 'TOO_SHORT',
+  TOO_LONG = 'TOO_LONG',
+  BELOW_MINIMUM = 'BELOW_MINIMUM',
+  ABOVE_MAXIMUM = 'ABOVE_MAXIMUM',
+  NOT_FOUND = 'NOT_FOUND',
+  ALREADY_EXISTS = 'ALREADY_EXISTS',
+}
 
 export default ErrorType;
