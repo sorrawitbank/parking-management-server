@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -71,6 +73,7 @@ export class VehiclesController {
   }
 
   @Delete(':vehicleId')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteVehicle(@Param() params: VehicleIdDto) {
     await this.vehiclesService.deleteVehicle(params.vehicleId);
   }

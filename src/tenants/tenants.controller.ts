@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -70,6 +72,7 @@ export class TenantsController {
   }
 
   @Delete(':tenantId')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteTenant(@Param() params: TenantIdDto) {
     await this.tenantsService.deleteTenant(params.tenantId);
   }
