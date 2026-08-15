@@ -133,18 +133,18 @@ export class VehiclesService {
   }
 
   async createVehicle(vehicle: typeof vehicles.$inferInsert) {
-    await this.validateVehicleForeignKeyFields(
-      vehicle.tenantId,
-      vehicle.provinceId,
-      vehicle.vehicleTypeId,
-      vehicle.vehicleBrandId,
-    );
+    await this.validateVehicleForeignKeyFields({
+      tenantId: vehicle.tenantId,
+      provinceId: vehicle.provinceId,
+      vehicleTypeId: vehicle.vehicleTypeId,
+      vehicleBrandId: vehicle.vehicleBrandId,
+    });
 
-    await this.validateVehicleUniqueFields(
-      vehicle.licensePlatePrefix,
-      vehicle.licensePlateNumber,
-      vehicle.provinceId,
-    );
+    await this.validateVehicleUniqueFields({
+      licensePlatePrefix: vehicle.licensePlatePrefix,
+      licensePlateNumber: vehicle.licensePlateNumber,
+      provinceId: vehicle.provinceId,
+    });
 
     const createdVehicle = await this.db.transaction(async (tx) => {
       const createdVehicle = await tx
@@ -180,19 +180,19 @@ export class VehiclesService {
       throw Required('body');
     }
 
-    await this.validateVehicleForeignKeyFields(
-      vehicle.tenantId,
-      vehicle.provinceId,
-      vehicle.vehicleTypeId,
-      vehicle.vehicleBrandId,
-    );
+    await this.validateVehicleForeignKeyFields({
+      tenantId: vehicle.tenantId,
+      provinceId: vehicle.provinceId,
+      vehicleTypeId: vehicle.vehicleTypeId,
+      vehicleBrandId: vehicle.vehicleBrandId,
+    });
 
-    await this.validateVehicleUniqueFields(
-      vehicle.licensePlatePrefix,
-      vehicle.licensePlateNumber,
-      vehicle.provinceId,
-      vehicleId,
-    );
+    await this.validateVehicleUniqueFields({
+      licensePlatePrefix: vehicle.licensePlatePrefix,
+      licensePlateNumber: vehicle.licensePlateNumber,
+      provinceId: vehicle.provinceId,
+      excludeVehicleId: vehicleId,
+    });
 
     const updatedVehicle = await this.db.transaction(async (tx) => {
       const updatedVehicle = await tx
@@ -236,12 +236,12 @@ export class VehiclesService {
     }
   }
 
-  private async validateVehicleForeignKeyFields(
-    tenantId?: string,
-    provinceId?: number,
-    vehicleTypeId?: number,
-    vehicleBrandId?: number | null,
-  ) {
+  private async validateVehicleForeignKeyFields({
+    tenantId,
+    provinceId,
+    vehicleTypeId,
+    vehicleBrandId,
+  }: ValidateVehicleForeignKeyFieldsParams) {
     if (!tenantId && !provinceId && !vehicleTypeId && !vehicleBrandId) {
       return;
     }
@@ -296,12 +296,12 @@ export class VehiclesService {
     }
   }
 
-  private async validateVehicleUniqueFields(
-    licensePlatePrefix?: string,
-    licensePlateNumber?: string,
-    provinceId?: number,
-    excludeVehicleId?: string,
-  ) {
+  private async validateVehicleUniqueFields({
+    licensePlatePrefix,
+    licensePlateNumber,
+    provinceId,
+    excludeVehicleId,
+  }: ValidateVehicleUniqueFieldsParams) {
     if (!licensePlatePrefix && !licensePlateNumber && !provinceId) {
       return;
     }

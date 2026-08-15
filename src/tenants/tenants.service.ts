@@ -62,7 +62,10 @@ export class TenantsService {
   }
 
   async createTenant(tenant: typeof tenants.$inferInsert) {
-    await this.validateTenantUniqueFields(tenant.phone, tenant.lineId);
+    await this.validateTenantUniqueFields({
+      phone: tenant.phone,
+      lineId: tenant.lineId,
+    });
 
     const createdTenant = await this.db
       .insert(tenants)
@@ -80,11 +83,11 @@ export class TenantsService {
       throw Required('body');
     }
 
-    await this.validateTenantUniqueFields(
-      tenant.phone,
-      tenant.lineId,
-      tenantId,
-    );
+    await this.validateTenantUniqueFields({
+      phone: tenant.phone,
+      lineId: tenant.lineId,
+      excludeTenantId: tenantId,
+    });
 
     const updatedTenant = await this.db
       .update(tenants)
@@ -110,11 +113,11 @@ export class TenantsService {
     }
   }
 
-  private async validateTenantUniqueFields(
-    phone?: string | null,
-    lineId?: string | null,
-    excludeTenantId?: string,
-  ) {
+  private async validateTenantUniqueFields({
+    phone,
+    lineId,
+    excludeTenantId,
+  }: ValidateTenantUniqueFieldsParams) {
     if (!phone && !lineId) {
       return;
     }
