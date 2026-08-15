@@ -1,2 +1,2 @@
-export { default as ParseNumberArray } from './parse-number-array';
-export { default as Trim } from './trim';
+export { default as ParseNumberArray } from './parse-number-array.decorator';
+export { default as Trim } from './trim.decorator';
