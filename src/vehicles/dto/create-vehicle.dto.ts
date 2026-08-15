@@ -11,7 +11,7 @@ import {
 import { BrandIdDto } from '../brands/dto/brand-id.dto';
 import { TypeIdDto } from '../types/dto/type-id.dto';
 import { Trim } from '../../common/decorators';
-import ErrorType from '../../common/errors/error-type';
+import ErrorType from '../../common/errors/error-type.enum';
 import { ProvinceIdDto } from '../../provinces/dto/province-id.dto';
 import { TenantIdDto } from '../../tenants/dto/tenant-id.dto';
 

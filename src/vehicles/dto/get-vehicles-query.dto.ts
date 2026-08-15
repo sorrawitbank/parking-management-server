@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { ParseNumberArray, Trim } from '../../common/decorators';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
-import ErrorType from '../../common/errors/error-type';
+import ErrorType from '../../common/errors/error-type.enum';
 
 export class GetVehiclesQueryDto extends PaginationQueryDto {
   @Max(99, { each: true, message: ErrorType.ABOVE_MAXIMUM })

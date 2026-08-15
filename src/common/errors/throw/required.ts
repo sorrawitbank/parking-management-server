@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import ErrorType from '../error-type';
+import ErrorType from '../error-type.enum';
 import { toScreamingSnake } from '../../../common/utils';
 
 /**

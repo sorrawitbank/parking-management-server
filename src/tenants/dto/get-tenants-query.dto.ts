@@ -1,7 +1,7 @@
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { Trim } from '../../common/decorators';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
-import ErrorType from '../../common/errors/error-type';
+import ErrorType from '../../common/errors/error-type.enum';
 
 export class GetTenantsQueryDto extends PaginationQueryDto {
   @IsBoolean({ message: ErrorType.INVALID_TYPE })

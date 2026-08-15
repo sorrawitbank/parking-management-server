@@ -8,7 +8,7 @@ import {
   Matches,
 } from 'class-validator';
 import { Trim } from '../../common/decorators';
-import ErrorType from '../../common/errors/error-type';
+import ErrorType from '../../common/errors/error-type.enum';
 
 export class CreateTenantDto {
   @Length(2, 100, { message: ErrorType.INVALID_LENGTH })

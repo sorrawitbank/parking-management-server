@@ -1,4 +1,4 @@
-import ErrorType from '../errors/error-type';
+import ErrorType from '../errors/error-type.enum';
 
 function toScreamingSnake(string: string) {
   if (!string.match(/^[a-zA-Z0-9]*$/)) {

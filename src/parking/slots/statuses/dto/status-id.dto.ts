@@ -1,5 +1,5 @@
 import { IsInt, IsNotEmpty, Min } from 'class-validator';
-import ErrorType from '../../../../common/errors/error-type';
+import ErrorType from '../../../../common/errors/error-type.enum';
 
 export class StatusIdDto {
   @Min(1, { message: ErrorType.BELOW_MINIMUM })
