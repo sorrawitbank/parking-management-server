@@ -6,7 +6,7 @@ import {
   parkingSlots,
   parkingSlotsWithStatus,
 } from '../../database/database.schemas';
-import type Database from '../../database/types/database';
+import type Database from '../../database/interfaces/database.interface';
 
 @Injectable()
 export class SlotsService {

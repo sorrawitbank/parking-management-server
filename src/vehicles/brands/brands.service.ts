@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import { NotFound } from '../../common/errors/throw';
 import DATABASE_CONNECTION from '../../database/database-connection';
 import { vehicleBrands } from '../../database/database.schemas';
-import type Database from '../../database/types/database';
+import type Database from '../../database/interfaces/database.interface';
 
 @Injectable()
 export class BrandsService {

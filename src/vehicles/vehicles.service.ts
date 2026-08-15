@@ -20,7 +20,7 @@ import { PaginationMetaDto } from '../common/dto/pagination-meta.dto';
 import { AlreadyExists, NotFound, Required } from '../common/errors/throw';
 import DATABASE_CONNECTION from '../database/database-connection';
 import { vehicles } from '../database/database.schemas';
-import type Database from '../database/types/database';
+import type Database from '../database/interfaces/database.interface';
 import { ProvincesService } from '../provinces/provinces.service';
 import { TenantsService } from '../tenants/tenants.service';
 

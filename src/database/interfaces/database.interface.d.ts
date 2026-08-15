@@ -7,6 +7,6 @@ const schema = {
   ...schemas,
 };
 
-type Database = NodePgDatabase<typeof schema>;
+declare type Database = NodePgDatabase<typeof schema>;
 
 export default Database;
