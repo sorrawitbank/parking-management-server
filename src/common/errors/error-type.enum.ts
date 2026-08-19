@@ -1,16 +1,17 @@
 /**
- * `ERROR_TYPES` - Error types for the validation errors
+ * Error types for the validation errors
  *
- * - `REQUIRED` - \@IsNotEmpty - The field is required
- * - `INVALID_TYPE` - \@IsString \@IsInt - The field is not a valid type
- * - `INVALID_FORMAT` - \@IsEmail \@IsPhoneNumber \@Matches - The field is not a valid format
- * - `INVALID_LENGTH` - \@Length - The field is not a valid length
- * - `TOO_SHORT` - \@MinLength - The field is too short
- * - `TOO_LONG` - \@MaxLength - The field is too long
- * - `BELOW_MINIMUM` - \@Min - The field is below the minimum
- * - `ABOVE_MAXIMUM` - \@Max - The field is above the maximum
- * - `NOT_FOUND` - Record not found
+ * - `REQUIRED` - The field is required - Example: `@IsNotEmpty`
+ * - `INVALID_TYPE` - The field is not a valid type - Example: `@IsString` `@IsInt`
+ * - `INVALID_FORMAT` - The field is not a valid format - Example: `@IsEmail` `@IsPhoneNumber` `@Matches`
+ * - `INVALID_LENGTH` - The field is not a valid length - Example: `@Length`
+ * - `TOO_SHORT` - The field is too short - Example: `@MinLength`
+ * - `TOO_LONG` - The field is too long - Example: `@MaxLength`
+ * - `BELOW_MINIMUM` - The field is below the minimum - Example: `@Min`
+ * - `ABOVE_MAXIMUM` - The field is above the maximum - Example: `@Max`
+ * - `NOT_FOUND` - Record not found - Example: `@IsNotEmpty`
  * - `ALREADY_EXISTS` - Value already exists
+ * - `ALREADY_OCCUPIED` - Value already occupied
  */
 enum ErrorType {
   REQUIRED = 'REQUIRED',
@@ -23,6 +24,7 @@ enum ErrorType {
   ABOVE_MAXIMUM = 'ABOVE_MAXIMUM',
   NOT_FOUND = 'NOT_FOUND',
   ALREADY_EXISTS = 'ALREADY_EXISTS',
+  ALREADY_OCCUPIED = 'ALREADY_OCCUPIED',
 }
 
 export default ErrorType;
