@@ -1,5 +1,8 @@
-import { PickType } from '@nestjs/mapped-types';
+import { IntersectionType, PickType } from '@nestjs/mapped-types';
 import { Expose, Type } from 'class-transformer';
+import { BrandResponseDto } from '../brands/dto/brand-response.dto';
+import { TypeResponseDto } from '../types/dto/type-response.dto';
+import { ProvinceResponseDto } from '../../provinces/dto/province-response.dto';
 import { TenantResponseDto } from '../../tenants/dto/tenant-response.dto';
 
 class TenantInVehicleDto extends PickType(TenantResponseDto, [
@@ -7,7 +10,11 @@ class TenantInVehicleDto extends PickType(TenantResponseDto, [
   'name',
 ] as const) {}
 
-export class VehicleResponseDto {
+export class VehicleResponseDto extends IntersectionType(
+  PickType(ProvinceResponseDto, ['provinceId'] as const),
+  PickType(TypeResponseDto, ['vehicleTypeId'] as const),
+  PickType(BrandResponseDto, ['vehicleBrandId'] as const),
+) {
   @Expose()
   vehicleId: string;
 
@@ -16,15 +23,6 @@ export class VehicleResponseDto {
 
   @Expose()
   licensePlateNumber: string;
-
-  @Expose()
-  provinceId: number;
-
-  @Expose()
-  vehicleTypeId: number;
-
-  @Expose()
-  vehicleBrandId: number | null;
 
   @Expose()
   note: string | null;
