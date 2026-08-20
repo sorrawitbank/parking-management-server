@@ -344,7 +344,7 @@ export const parkingSlotStatuses = pgTable(
 export const parkingAssignments = pgTable(
   'parking_assignments',
   {
-    assignmentId: bigint('assignment_id', { mode: 'bigint' })
+    assignmentId: bigint('assignment_id', { mode: 'number' })
       .primaryKey()
       .generatedAlwaysAsIdentity({
         name: 'parking_assignments_assignment_id_seq',
@@ -374,7 +374,7 @@ export const parkingAssignments = pgTable(
       .onDelete('restrict'),
     check(
       'parking_assignments_paid_until_month_ck',
-      sql`paid_until_month = (((date_trunc('month'::text, (paid_until_month)::timestamp with time zone) + '1 mon'::interval) - '1 day'::interval))::date`,
+      sql`EXTRACT(day FROM paid_until_month) = (1)::numeric`,
     ),
     check(
       'parking_assignments_monthly_fee_ck',
@@ -436,7 +436,7 @@ export const parkingAssignmentStatuses = pgTable(
 export const parkingAssignmentSlots = pgTable(
   'parking_assignment_slots',
   {
-    assignmentSlotId: bigint('assignment_slot_id', { mode: 'bigint' })
+    assignmentSlotId: bigint('assignment_slot_id', { mode: 'number' })
       .primaryKey()
       .generatedAlwaysAsIdentity({
         name: 'parking_assignment_slots_assignment_slot_id_seq',
@@ -446,7 +446,7 @@ export const parkingAssignmentSlots = pgTable(
         maxValue: 9223372036854775807,
         cache: 1,
       }),
-    assignmentId: bigint('assignment_id', { mode: 'bigint' }).notNull(),
+    assignmentId: bigint('assignment_id', { mode: 'number' }).notNull(),
     slotId: uuid('slot_id').notNull(),
     assignedDate: date('assigned_date').notNull(),
     endedDate: date('ended_date'),
@@ -494,7 +494,7 @@ export const parkingSlotsWithStatus = pgView('parking_slots_with_status', {
 export const parkingAssignmentSlotsWithAssignedDays = pgView(
   'parking_assignment_slots_with_assigned_days',
   {
-    assignmentSlotId: bigint('assignment_slot_id', { mode: 'bigint' })
+    assignmentSlotId: bigint('assignment_slot_id', { mode: 'number' })
       .primaryKey()
       .generatedAlwaysAsIdentity({
         name: 'parking_assignment_slots_assignment_slot_id_seq',
@@ -504,7 +504,7 @@ export const parkingAssignmentSlotsWithAssignedDays = pgView(
         maxValue: 9223372036854775807,
         cache: 1,
       }),
-    assignmentId: bigint('assignment_id', { mode: 'bigint' }).notNull(),
+    assignmentId: bigint('assignment_id', { mode: 'number' }).notNull(),
     slotId: uuid('slot_id').notNull(),
     assignedDate: date('assigned_date').notNull(),
     endedDate: date('ended_date'),
@@ -518,7 +518,7 @@ export const parkingAssignmentSlotsWithAssignedDays = pgView(
 export const parkingAssignmentsWithStats = pgView(
   'parking_assignments_with_stats',
   {
-    assignmentId: bigint('assignment_id', { mode: 'bigint' })
+    assignmentId: bigint('assignment_id', { mode: 'number' })
       .primaryKey()
       .generatedAlwaysAsIdentity({
         name: 'parking_assignments_assignment_id_seq',
@@ -547,7 +547,7 @@ export const parkingAssignmentsWithStats = pgView(
 );
 
 export const activeParkingAssignments = pgView('active_parking_assignments', {
-  assignmentId: bigint('assignment_id', { mode: 'bigint' })
+  assignmentId: bigint('assignment_id', { mode: 'number' })
     .primaryKey()
     .generatedAlwaysAsIdentity({
       name: 'parking_assignments_assignment_id_seq',
