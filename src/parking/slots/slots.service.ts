@@ -36,4 +36,17 @@ export class SlotsService {
 
     return parkingSlot;
   }
+
+  async getParkingSlotsWithStatusById(slotId: string) {
+    const parkingSlot = await this.db
+      .select()
+      .from(parkingSlotsWithStatus)
+      .where(eq(parkingSlotsWithStatus.slotId, slotId));
+
+    if (parkingSlot.length === 0) {
+      throw NotFound('parkingSlot');
+    }
+
+    return parkingSlot[0];
+  }
 }
