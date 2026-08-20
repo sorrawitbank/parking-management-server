@@ -12,14 +12,16 @@ export class TenantsService {
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
 
   async getTenants(query: GetTenantsQueryDto) {
-    const fromClause = query.isRenting ? rentingTenants : tenants;
+    const { page, limit, offset, isRenting, keyword } = query;
 
-    const whereClause = query.keyword
+    const fromClause = isRenting ? rentingTenants : tenants;
+
+    const whereClause = keyword
       ? or(
-          ilike(fromClause.name, `%${query.keyword}%`),
-          ilike(fromClause.phone, `%${query.keyword}%`),
-          ilike(fromClause.lineId, `%${query.keyword}%`),
-          ilike(fromClause.note, `%${query.keyword}%`),
+          ilike(fromClause.name, `%${keyword}%`),
+          ilike(fromClause.phone, `%${keyword}%`),
+          ilike(fromClause.lineId, `%${keyword}%`),
+          ilike(fromClause.note, `%${keyword}%`),
         )
       : undefined;
 
@@ -34,18 +36,14 @@ export class TenantsService {
         .from(fromClause)
         .where(whereClause)
         .orderBy(desc(fromClause.updatedAt), asc(fromClause.tenantId))
-        .limit(query.limit)
-        .offset(query.offset),
+        .limit(limit)
+        .offset(offset),
       this.db.select({ total: count() }).from(fromClause).where(whereClause),
     ]);
 
     return {
       tenants: result,
-      pagination: new PaginationMetaDto(
-        query.page,
-        query.limit,
-        total[0].total,
-      ),
+      pagination: new PaginationMetaDto(page, limit, total[0].total),
     };
   }
 
@@ -62,10 +60,9 @@ export class TenantsService {
   }
 
   async createTenant(tenant: typeof tenants.$inferInsert) {
-    await this.validateTenantUniqueFields({
-      phone: tenant.phone,
-      lineId: tenant.lineId,
-    });
+    const { phone, lineId } = tenant;
+
+    await this.validateTenantUniqueFields({ phone, lineId });
 
     const createdTenant = await this.db
       .insert(tenants)
@@ -83,9 +80,11 @@ export class TenantsService {
       throw Required('body');
     }
 
+    const { phone, lineId } = tenant;
+
     await this.validateTenantUniqueFields({
-      phone: tenant.phone,
-      lineId: tenant.lineId,
+      phone,
+      lineId,
       excludeTenantId: tenantId,
     });
 
@@ -113,11 +112,11 @@ export class TenantsService {
     }
   }
 
-  private async validateTenantUniqueFields({
-    phone,
-    lineId,
-    excludeTenantId,
-  }: ValidateTenantUniqueFieldsParams) {
+  private async validateTenantUniqueFields(
+    params: ValidateTenantUniqueFieldsParams,
+  ) {
+    const { phone, lineId, excludeTenantId } = params;
+
     if (!phone && !lineId) {
       return;
     }

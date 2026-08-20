@@ -35,37 +35,48 @@ export class VehiclesService {
   ) {}
 
   async getVehicles(query: GetVehiclesQueryDto) {
+    const {
+      page,
+      limit,
+      offset,
+      provinceIds,
+      vehicleTypeIds,
+      vehicleBrandIds,
+      includeNullBrand,
+      keyword,
+    } = query;
+
     const conditions: (SQL | undefined)[] = [];
 
-    if (query.keyword) {
+    if (keyword) {
       conditions.push(
         or(
           ilike(
             concat(vehicles.licensePlatePrefix, vehicles.licensePlateNumber),
-            `%${query.keyword}%`,
+            `%${keyword}%`,
           ),
-          ilike(vehicles.note, `%${query.keyword}%`),
+          ilike(vehicles.note, `%${keyword}%`),
         ),
       );
     }
 
-    if (query.provinceIds) {
-      conditions.push(inArray(vehicles.provinceId, query.provinceIds));
+    if (provinceIds) {
+      conditions.push(inArray(vehicles.provinceId, provinceIds));
     }
 
-    if (query.vehicleTypeIds) {
-      conditions.push(inArray(vehicles.vehicleTypeId, query.vehicleTypeIds));
+    if (vehicleTypeIds) {
+      conditions.push(inArray(vehicles.vehicleTypeId, vehicleTypeIds));
     }
 
     const vehicleBrandIdsConditions: (SQL | undefined)[] = [];
 
-    if (query.vehicleBrandIds) {
+    if (vehicleBrandIds) {
       vehicleBrandIdsConditions.push(
-        inArray(vehicles.vehicleBrandId, query.vehicleBrandIds),
+        inArray(vehicles.vehicleBrandId, vehicleBrandIds),
       );
     }
 
-    if (query.includeNullBrand) {
+    if (includeNullBrand) {
       vehicleBrandIdsConditions.push(isNull(vehicles.vehicleBrandId));
     }
 
@@ -93,19 +104,15 @@ export class VehiclesService {
           },
         },
         orderBy: [desc(vehicles.updatedAt), asc(vehicles.vehicleId)],
-        limit: query.limit,
-        offset: query.offset,
+        limit,
+        offset,
       }),
       this.db.select({ total: count() }).from(vehicles).where(whereClause),
     ]);
 
     return {
       vehicles: result,
-      pagination: new PaginationMetaDto(
-        query.page,
-        query.limit,
-        total[0].total,
-      ),
+      pagination: new PaginationMetaDto(page, limit, total[0].total),
     };
   }
 
@@ -133,17 +140,26 @@ export class VehiclesService {
   }
 
   async createVehicle(vehicle: typeof vehicles.$inferInsert) {
+    const {
+      tenantId,
+      licensePlatePrefix,
+      licensePlateNumber,
+      provinceId,
+      vehicleTypeId,
+      vehicleBrandId,
+    } = vehicle;
+
     await this.validateVehicleForeignKeyFields({
-      tenantId: vehicle.tenantId,
-      provinceId: vehicle.provinceId,
-      vehicleTypeId: vehicle.vehicleTypeId,
-      vehicleBrandId: vehicle.vehicleBrandId,
+      tenantId,
+      provinceId,
+      vehicleTypeId,
+      vehicleBrandId,
     });
 
     await this.validateVehicleUniqueFields({
-      licensePlatePrefix: vehicle.licensePlatePrefix,
-      licensePlateNumber: vehicle.licensePlateNumber,
-      provinceId: vehicle.provinceId,
+      licensePlatePrefix,
+      licensePlateNumber,
+      provinceId,
     });
 
     const createdVehicle = await this.db.transaction(async (tx) => {
@@ -180,17 +196,26 @@ export class VehiclesService {
       throw Required('body');
     }
 
+    const {
+      tenantId,
+      licensePlatePrefix,
+      licensePlateNumber,
+      provinceId,
+      vehicleTypeId,
+      vehicleBrandId,
+    } = vehicle;
+
     await this.validateVehicleForeignKeyFields({
-      tenantId: vehicle.tenantId,
-      provinceId: vehicle.provinceId,
-      vehicleTypeId: vehicle.vehicleTypeId,
-      vehicleBrandId: vehicle.vehicleBrandId,
+      tenantId,
+      provinceId,
+      vehicleTypeId,
+      vehicleBrandId,
     });
 
     await this.validateVehicleUniqueFields({
-      licensePlatePrefix: vehicle.licensePlatePrefix,
-      licensePlateNumber: vehicle.licensePlateNumber,
-      provinceId: vehicle.provinceId,
+      licensePlatePrefix,
+      licensePlateNumber,
+      provinceId,
       excludeVehicleId: vehicleId,
     });
 
@@ -236,12 +261,11 @@ export class VehiclesService {
     }
   }
 
-  private async validateVehicleForeignKeyFields({
-    tenantId,
-    provinceId,
-    vehicleTypeId,
-    vehicleBrandId,
-  }: ValidateVehicleForeignKeyFieldsParams) {
+  private async validateVehicleForeignKeyFields(
+    params: ValidateVehicleForeignKeyFieldsParams,
+  ) {
+    const { tenantId, provinceId, vehicleTypeId, vehicleBrandId } = params;
+
     if (!tenantId && !provinceId && !vehicleTypeId && !vehicleBrandId) {
       return;
     }
@@ -296,12 +320,16 @@ export class VehiclesService {
     }
   }
 
-  private async validateVehicleUniqueFields({
-    licensePlatePrefix,
-    licensePlateNumber,
-    provinceId,
-    excludeVehicleId,
-  }: ValidateVehicleUniqueFieldsParams) {
+  private async validateVehicleUniqueFields(
+    params: ValidateVehicleUniqueFieldsParams,
+  ) {
+    const {
+      licensePlatePrefix,
+      licensePlateNumber,
+      provinceId,
+      excludeVehicleId,
+    } = params;
+
     if (!licensePlatePrefix && !licensePlateNumber && !provinceId) {
       return;
     }
