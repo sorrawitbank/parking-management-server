@@ -28,9 +28,6 @@ function registerGlobals(app: INestApplication) {
       },
       forbidNonWhitelisted: true,
       transform: true,
-      transformOptions: {
-        enableImplicitConversion: true,
-      },
       whitelist: true,
     }),
   );
