@@ -6,7 +6,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { ParseNumberArray, Trim } from '../../common/decorators';
+import { ParseBoolean, ParseNumberArray, Trim } from '../../common/decorators';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import ErrorType from '../../common/errors/error-type.enum';
 
@@ -32,6 +32,7 @@ export class GetVehiclesQueryDto extends PaginationQueryDto {
 
   @IsBoolean({ message: ErrorType.INVALID_TYPE })
   @IsOptional()
+  @ParseBoolean({ strict: true })
   readonly includeNullBrand?: boolean;
 
   @IsString({ message: ErrorType.INVALID_TYPE })
