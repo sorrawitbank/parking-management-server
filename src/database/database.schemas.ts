@@ -590,3 +590,22 @@ export const rentingTenants = pgView('renting_tenants', {
 }).as(
   sql`SELECT tenant_id, name, phone, line_id, note, created_at, updated_at FROM tenants t WHERE (EXISTS ( SELECT 1 FROM parking_assignments_with_stats pawst WHERE pawst.is_active AND pawst.tenant_id = t.tenant_id))`,
 );
+
+export const nonRentingTenants = pgView('non_renting_tenants', {
+  tenantId: uuid('tenant_id')
+    .default(sql`uuid_generate_v4()`)
+    .primaryKey()
+    .notNull(),
+  name: varchar({ length: 100 }).notNull(),
+  phone: varchar({ length: 10 }),
+  lineId: varchar('line_id', { length: 20 }),
+  note: varchar({ length: 500 }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+}).as(
+  sql`SELECT tenant_id, name, phone, line_id, note, created_at, updated_at FROM tenants t WHERE NOT (EXISTS ( SELECT 1 FROM parking_assignments_with_stats pa WHERE pa.is_active AND pa.tenant_id = t.tenant_id))`,
+);
