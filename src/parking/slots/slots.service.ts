@@ -38,18 +38,6 @@ export class SlotsService {
     return this.db.select().from(parkingSlotsWithStatus);
   }
 
-  async getParkingSlotById(slotId: string) {
-    const parkingSlot = await this.db.query.parkingSlots.findFirst({
-      where: eq(parkingSlots.slotId, slotId),
-    });
-
-    if (!parkingSlot) {
-      throw NotFound('parkingSlot');
-    }
-
-    return parkingSlot;
-  }
-
   async getParkingSlotsWithStatusById(slotId: string) {
     const parkingSlot = await this.db
       .select()

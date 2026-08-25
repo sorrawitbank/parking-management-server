@@ -15,7 +15,7 @@ export class SlotsController {
     return plainToInstance(SlotResponseDto, parkingSlots);
   }
 
-  @Get('/with-status')
+  @Get('with-status')
   async getParkingSlotsWithStatus(): Promise<GetSlotWithStatusResponseDto[]> {
     const parkingSlotsWithStatus =
       await this.slotsService.getParkingSlotsWithStatus();
