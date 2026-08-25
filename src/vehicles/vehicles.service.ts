@@ -271,15 +271,15 @@ export class VehiclesService {
     }
 
     const results = await Promise.allSettled([
-      tenantId ? this.tenantsService.getTenantById(tenantId) : undefined,
+      tenantId ? this.tenantsService.ensureTenantExists(tenantId) : undefined,
       provinceId
-        ? this.provincesService.getProvinceById(provinceId)
+        ? this.provincesService.ensureProvinceExists(provinceId)
         : undefined,
       vehicleTypeId
-        ? this.typesService.getVehicleTypeById(vehicleTypeId)
+        ? this.typesService.ensureVehicleTypeExists(vehicleTypeId)
         : undefined,
       vehicleBrandId
-        ? this.brandsService.getVehicleBrandById(vehicleBrandId)
+        ? this.brandsService.ensureVehicleBrandExists(vehicleBrandId)
         : undefined,
     ]);
 
