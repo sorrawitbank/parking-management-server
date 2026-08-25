@@ -9,6 +9,19 @@ import type Database from '../database/interfaces/database.interface';
 export class ProvincesService {
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
 
+  async ensureProvinceExists(provinceId: number) {
+    const province = await this.db.query.provinces.findFirst({
+      columns: {
+        provinceId: true,
+      },
+      where: eq(provinces.provinceId, provinceId),
+    });
+
+    if (!province) {
+      throw NotFound('province');
+    }
+  }
+
   async getProvinces() {
     return this.db.query.provinces.findMany({
       columns: {
@@ -16,17 +29,5 @@ export class ProvincesService {
         updatedAt: false,
       },
     });
-  }
-
-  async getProvinceById(provinceId: number) {
-    const province = await this.db.query.provinces.findFirst({
-      where: eq(provinces.provinceId, provinceId),
-    });
-
-    if (!province) {
-      throw NotFound('province');
-    }
-
-    return province;
   }
 }

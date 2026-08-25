@@ -9,6 +9,19 @@ import type Database from '../../database/interfaces/database.interface';
 export class BrandsService {
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
 
+  async ensureVehicleBrandExists(vehicleBrandId: number) {
+    const vehicleBrand = await this.db.query.vehicleBrands.findFirst({
+      columns: {
+        vehicleBrandId: true,
+      },
+      where: eq(vehicleBrands.vehicleBrandId, vehicleBrandId),
+    });
+
+    if (!vehicleBrand) {
+      throw NotFound('vehicleBrand');
+    }
+  }
+
   async getVehicleBrands() {
     return this.db.query.vehicleBrands.findMany({
       columns: {
@@ -16,17 +29,5 @@ export class BrandsService {
         updatedAt: false,
       },
     });
-  }
-
-  async getVehicleBrandById(vehicleBrandId: number) {
-    const vehicleBrand = await this.db.query.vehicleBrands.findFirst({
-      where: eq(vehicleBrands.vehicleBrandId, vehicleBrandId),
-    });
-
-    if (!vehicleBrand) {
-      throw NotFound('vehicleBrand');
-    }
-
-    return vehicleBrand;
   }
 }

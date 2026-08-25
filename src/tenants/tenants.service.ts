@@ -15,6 +15,19 @@ import type Database from '../database/interfaces/database.interface';
 export class TenantsService {
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
 
+  async ensureTenantExists(tenantId: string) {
+    const tenant = await this.db.query.tenants.findFirst({
+      columns: {
+        tenantId: true,
+      },
+      where: eq(tenants.tenantId, tenantId),
+    });
+
+    if (!tenant) {
+      throw NotFound('tenant');
+    }
+  }
+
   async getTenants(query: GetTenantsQueryDto) {
     const { page, limit, offset, isRenting, keyword } = query;
 

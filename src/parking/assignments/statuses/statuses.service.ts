@@ -1,8 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
-import { NotFound } from '../../../common/errors/throw';
 import DATABASE_CONNECTION from '../../../database/database-connection';
-import { parkingAssignmentStatuses } from '../../../database/database.schemas';
 import type Database from '../../../database/interfaces/database.interface';
 
 @Injectable()
@@ -16,21 +13,5 @@ export class StatusesService {
         updatedAt: false,
       },
     });
-  }
-
-  async getParkingAssignmentStatusById(assignmentStatusId: number) {
-    const parkingAssignmentStatus =
-      await this.db.query.parkingAssignmentStatuses.findFirst({
-        where: eq(
-          parkingAssignmentStatuses.assignmentStatusId,
-          assignmentStatusId,
-        ),
-      });
-
-    if (!parkingAssignmentStatus) {
-      throw NotFound('parkingAssignmentStatus');
-    }
-
-    return parkingAssignmentStatus;
   }
 }
