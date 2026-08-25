@@ -72,6 +72,16 @@ export class TenantsService {
   async getTenantById(tenantId: string) {
     const tenant = await this.db.query.tenants.findFirst({
       where: eq(tenants.tenantId, tenantId),
+      with: {
+        vehicles: {
+          columns: {
+            tenantId: false,
+            note: false,
+            createdAt: false,
+            updatedAt: false,
+          },
+        },
+      },
     });
 
     if (!tenant) {
