@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
   bigint,
   boolean,
@@ -17,7 +18,6 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
 import { int4range } from './customs/int4range';
 
 export const userRole = pgEnum('user_role', ['user', 'admin']);
@@ -356,7 +356,11 @@ export const parkingAssignments = pgTable(
       }),
     tenantId: uuid('tenant_id').notNull(),
     paidUntilMonth: date('paid_until_month').notNull(),
-    monthlyFee: numeric('monthly_fee', { precision: 6, scale: 2 }).notNull(),
+    monthlyFee: numeric('monthly_fee', {
+      precision: 6,
+      scale: 2,
+      mode: 'number',
+    }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -530,7 +534,11 @@ export const parkingAssignmentsWithStats = pgView(
       }),
     tenantId: uuid('tenant_id').notNull(),
     paidUntilMonth: date('paid_until_month').notNull(),
-    monthlyFee: numeric('monthly_fee', { precision: 6, scale: 2 }).notNull(),
+    monthlyFee: numeric('monthly_fee', {
+      precision: 6,
+      scale: 2,
+      mode: 'number',
+    }).notNull(),
     assignedDate: date('assigned_date').notNull(),
     endedDate: date('ended_date'),
     assignedDays: integer('assigned_days').notNull(),
@@ -560,7 +568,11 @@ export const activeParkingAssignments = pgView('active_parking_assignments', {
   slotId: uuid('slot_id').notNull(),
   assignmentStatusId: integer('assignment_status_id').notNull(),
   paidUntilMonth: date('paid_until_month').notNull(),
-  monthlyFee: numeric('monthly_fee', { precision: 6, scale: 2 }).notNull(),
+  monthlyFee: numeric('monthly_fee', {
+    precision: 6,
+    scale: 2,
+    mode: 'number',
+  }).notNull(),
   assignedDate: date('assigned_date').notNull(),
   assignedDays: integer('assigned_days').notNull(),
   tenantId: uuid('tenant_id').notNull(),
