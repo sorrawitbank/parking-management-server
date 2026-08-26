@@ -569,7 +569,7 @@ export const activeParkingAssignments = pgView('active_parking_assignments', {
   lineId: varchar('line_id', { length: 20 }),
   note: varchar({ length: 500 }),
 }).as(
-  sql`SELECT pa.assignment_id, pas.slot_id, past.assignment_status_id, pa.paid_until_month, pa.monthly_fee, pa.assigned_date, pa.assigned_days, t.tenant_id, t.name, t.phone, t.line_id, t.note FROM parking_assignments_with_stats pa JOIN parking_assignment_slots pas ON pas.is_active AND pas.assignment_id = pa.assignment_id JOIN parking_assignment_statuses past ON past.month_diff_range @> (12::numeric * EXTRACT(year FROM age(pa.paid_until_month::timestamp with time zone, CURRENT_DATE::timestamp with time zone)) + EXTRACT(month FROM age(pa.paid_until_month::timestamp with time zone, CURRENT_DATE::timestamp with time zone)))::integer JOIN tenants t ON t.tenant_id = pa.tenant_id`,
+  sql`SELECT pa.assignment_id, pas.slot_id, past.assignment_status_id, pa.paid_until_month, pa.monthly_fee, pa.assigned_date, pa.assigned_days, t.tenant_id, t.name, t.phone, t.line_id, t.note FROM parking_assignments_with_stats pa JOIN parking_assignment_slots pas ON pas.is_active AND pas.assignment_id = pa.assignment_id JOIN parking_assignment_statuses past ON past.month_diff_range @> (12::numeric * (EXTRACT(year FROM pa.paid_until_month) - EXTRACT(year FROM CURRENT_DATE)) + EXTRACT(month FROM pa.paid_until_month) - EXTRACT(month FROM CURRENT_DATE))::integer JOIN tenants t ON t.tenant_id = pa.tenant_id`,
 );
 
 export const rentingTenants = pgView('renting_tenants', {
