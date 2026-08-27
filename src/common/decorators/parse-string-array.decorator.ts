@@ -13,7 +13,7 @@ function ParseStringArray() {
           ...new Set(
             String(value)
               .split(',')
-              .map((val) => val.trim()),
+              .map((value) => value.trim()),
           ),
         ]
       : undefined,
