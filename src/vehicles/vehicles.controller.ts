@@ -74,7 +74,7 @@ export class VehiclesController {
 
   @Delete(':vehicleId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteVehicle(@Param() params: VehicleIdDto) {
+  async deleteVehicle(@Param() params: VehicleIdDto): Promise<void> {
     await this.vehiclesService.deleteVehicle(params.vehicleId);
   }
 }

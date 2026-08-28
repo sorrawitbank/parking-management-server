@@ -73,7 +73,7 @@ export class TenantsController {
 
   @Delete(':tenantId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteTenant(@Param() params: TenantIdDto) {
+  async deleteTenant(@Param() params: TenantIdDto): Promise<void> {
     await this.tenantsService.deleteTenant(params.tenantId);
   }
 }
