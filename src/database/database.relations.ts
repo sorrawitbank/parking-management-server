@@ -31,7 +31,7 @@ export const vehiclesRelations = relations(vehicles, ({ one }) => ({
 
 export const tenantsRelations = relations(tenants, ({ many }) => ({
   vehicles: many(vehicles),
-  parkingAssignments: many(parkingAssignments),
+  assignments: many(parkingAssignments),
 }));
 
 export const provincesRelations = relations(provinces, ({ many }) => ({
@@ -53,18 +53,18 @@ export const parkingAssignmentsRelations = relations(
       fields: [parkingAssignments.tenantId],
       references: [tenants.tenantId],
     }),
-    parkingAssignmentSlots: many(parkingAssignmentSlots),
+    assignmentSlots: many(parkingAssignmentSlots),
   }),
 );
 
 export const parkingAssignmentSlotsRelations = relations(
   parkingAssignmentSlots,
   ({ one }) => ({
-    parkingAssignment: one(parkingAssignments, {
+    assignment: one(parkingAssignments, {
       fields: [parkingAssignmentSlots.assignmentId],
       references: [parkingAssignments.assignmentId],
     }),
-    parkingSlot: one(parkingSlots, {
+    slot: one(parkingSlots, {
       fields: [parkingAssignmentSlots.slotId],
       references: [parkingSlots.slotId],
     }),
@@ -72,5 +72,5 @@ export const parkingAssignmentSlotsRelations = relations(
 );
 
 export const parkingSlotsRelations = relations(parkingSlots, ({ many }) => ({
-  parkingAssignmentSlots: many(parkingAssignmentSlots),
+  assignmentSlots: many(parkingAssignmentSlots),
 }));

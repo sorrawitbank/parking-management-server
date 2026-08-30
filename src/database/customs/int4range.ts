@@ -29,11 +29,13 @@ export const int4range = customType<{
   fromDriver(value: string): Int4RangeValue {
     // Matches patterns like [1,10) or [,] or (,5]
     const match = value.match(/^([\[\(])(-?\d*),(-?\d*)([\]\)])$/);
+
     if (!match) {
       return { lower: null, upper: null };
     }
 
     const [, left, lower, upper, right] = match;
+
     return {
       lower: lower !== '' ? parseInt(lower, 10) : null,
       upper: upper !== '' ? parseInt(upper, 10) : null,
