@@ -31,7 +31,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "date-fns": "^4.4.0",
-    "drizzle-orm": "^0.45.2",
+    "drizzle-orm": "^1.0.0-rc.4",
     "pg": "^8.23.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
@@ -47,7 +47,7 @@
     "@types/node": "^26.2.0",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
-    "drizzle-kit": "^0.31.10",
+    "drizzle-kit": "^1.0.0-rc.4",
     "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
@@ -79,5 +79,9 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true,
+    "unrs-resolver@1.12.2": true
   }
 }
