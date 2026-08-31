@@ -1,12 +1,6 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import * as relations from '../database.relations';
-import * as schemas from '../database.schemas';
+import { relations } from '../database.relations';
 
-const schema = {
-  ...relations,
-  ...schemas,
-};
-
-declare type Database = NodePgDatabase<typeof schema>;
+declare type Database = NodePgDatabase<typeof relations>;
 
 export default Database;
