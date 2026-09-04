@@ -1,9 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
 import { NotFound } from '../common/errors/throw';
 import DATABASE_CONNECTION from '../database/database-connection';
-import { provinces } from '../database/database.schemas';
-import type Database from '../database/interfaces/database.interface';
+import { type Database } from '../database/interfaces';
 
 @Injectable()
 export class ProvincesService {
@@ -14,7 +12,9 @@ export class ProvincesService {
       columns: {
         provinceId: true,
       },
-      where: eq(provinces.provinceId, provinceId),
+      where: {
+        provinceId: { eq: provinceId },
+      },
     });
 
     if (!province) {

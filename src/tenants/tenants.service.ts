@@ -1,15 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, count, desc, eq, ilike, ne, or, SQL } from 'drizzle-orm';
+import { eq, operators } from 'drizzle-orm';
 import { GetTenantsQueryDto } from './dto/get-tenants-query.dto';
 import { PaginationMetaDto } from '../common/dto/pagination-meta.dto';
 import { AlreadyExists, NotFound, Required } from '../common/errors/throw';
 import DATABASE_CONNECTION from '../database/database-connection';
-import {
-  nonRentingTenants,
-  rentingTenants,
-  tenants,
-} from '../database/database.schemas';
-import type Database from '../database/interfaces/database.interface';
+import { tenants } from '../database/database.schemas';
+import { FindManyWhere, type Database } from '../database/interfaces';
 
 @Injectable()
 export class TenantsService {
@@ -20,7 +16,9 @@ export class TenantsService {
       columns: {
         tenantId: true,
       },
-      where: eq(tenants.tenantId, tenantId),
+      where: {
+        tenantId: { eq: tenantId },
+      },
     });
 
     if (!tenant) {
@@ -31,47 +29,57 @@ export class TenantsService {
   async getTenants(query: GetTenantsQueryDto) {
     const { page, limit, offset, isRenting, keyword } = query;
 
-    const fromClause =
+    const tenantQuery =
       isRenting === undefined
-        ? tenants
+        ? this.db.query.tenants
         : isRenting
-          ? rentingTenants
-          : nonRentingTenants;
+          ? this.db.query.rentingTenants
+          : this.db.query.nonRentingTenants;
 
-    const whereClause = keyword
-      ? or(
-          ilike(fromClause.name, `%${keyword}%`),
-          ilike(fromClause.phone, `%${keyword}%`),
-          ilike(fromClause.lineId, `%${keyword}%`),
-          ilike(fromClause.note, `%${keyword}%`),
-        )
+    const rawWhereClause: FindManyWhere<'tenants'>['RAW'] = keyword
+      ? (table, { ilike, or }) =>
+          or(
+            ilike(table.name, `%${keyword}%`),
+            ilike(table.phone, `%${keyword}%`),
+            ilike(table.lineId, `%${keyword}%`),
+            ilike(table.note, `%${keyword}%`),
+          )!
       : undefined;
 
     const [result, total] = await Promise.all([
-      this.db
-        .select({
-          tenantId: fromClause.tenantId,
-          name: fromClause.name,
-          phone: fromClause.phone,
-          lineId: fromClause.lineId,
-        })
-        .from(fromClause)
-        .where(whereClause)
-        .orderBy(desc(fromClause.updatedAt), asc(fromClause.tenantId))
-        .limit(limit)
-        .offset(offset),
-      this.db.select({ total: count() }).from(fromClause).where(whereClause),
+      tenantQuery.findMany({
+        columns: {
+          note: false,
+          createdAt: false,
+          updatedAt: false,
+        },
+        where: {
+          RAW: rawWhereClause,
+        },
+        orderBy: {
+          updatedAt: 'desc',
+          tenantId: 'asc',
+        },
+        limit,
+        offset,
+      }),
+      this.db.$count(
+        tenants,
+        rawWhereClause && rawWhereClause(tenants, operators),
+      ),
     ]);
 
     return {
       tenants: result,
-      pagination: new PaginationMetaDto(page, limit, total[0].total),
+      pagination: new PaginationMetaDto(page, limit, total),
     };
   }
 
   async getTenantById(tenantId: string) {
     const tenant = await this.db.query.tenants.findFirst({
-      where: eq(tenants.tenantId, tenantId),
+      where: {
+        tenantId: { eq: tenantId },
+      },
       with: {
         vehicles: {
           columns: {
@@ -153,7 +161,6 @@ export class TenantsService {
       return;
     }
 
-    const conditions: (SQL | undefined)[] = [];
     const uniqueFields = [
       {
         field: 'phone',
@@ -167,25 +174,24 @@ export class TenantsService {
       },
     ] as const;
 
-    if (phone) {
-      conditions.push(eq(tenants.phone, phone));
-    }
-
-    if (lineId) {
-      conditions.push(eq(tenants.lineId, lineId));
-    }
-
-    const whereClause = excludeTenantId
-      ? and(ne(tenants.tenantId, excludeTenantId), or(...conditions))
-      : or(...conditions);
-
     const existingTenants = await this.db.query.tenants.findMany({
-      where: whereClause,
+      where: {
+        AND: [
+          { tenantId: { ne: excludeTenantId } },
+          {
+            OR: [
+              { phone: { eq: phone ?? undefined } },
+              { lineId: { eq: lineId ?? undefined } },
+            ],
+          },
+        ],
+      },
     });
 
     const conflicts = uniqueFields.filter(
       ({ key, value }) =>
-        value && existingTenants.some((tenant) => tenant[key] === value),
+        value != null &&
+        existingTenants.some((tenant) => tenant[key] === value),
     );
 
     if (conflicts.length > 0) {

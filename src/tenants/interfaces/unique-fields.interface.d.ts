@@ -1,8 +1,8 @@
-declare interface TenantUniqueFields {
+interface TenantUniqueFields {
   phone: string | null;
   lineId: string | null;
 }
 
-declare interface ValidateTenantUniqueFieldsParams extends Partial<TenantUniqueFields> {
+interface ValidateTenantUniqueFieldsParams extends Partial<TenantUniqueFields> {
   excludeTenantId?: string;
 }

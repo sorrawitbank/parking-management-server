@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import DATABASE_CONNECTION from '../../../database/database-connection';
-import type Database from '../../../database/interfaces/database.interface';
+import { type Database } from '../../../database/interfaces';
 
 @Injectable()
 export class StatusesService {

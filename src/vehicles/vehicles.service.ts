@@ -1,17 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  ilike,
-  inArray,
-  isNull,
-  ne,
-  or,
-  SQL,
-} from 'drizzle-orm';
+import { eq, operators } from 'drizzle-orm';
 import { concat } from 'drizzle-orm/pg-core/expressions';
 import { BrandsService } from './brands/brands.service';
 import { GetVehiclesQueryDto } from './dto/get-vehicles-query.dto';
@@ -20,7 +8,7 @@ import { PaginationMetaDto } from '../common/dto/pagination-meta.dto';
 import { AlreadyExists, NotFound, Required } from '../common/errors/throw';
 import DATABASE_CONNECTION from '../database/database-connection';
 import { vehicles } from '../database/database.schemas';
-import type Database from '../database/interfaces/database.interface';
+import { FindManyWhere, type Database } from '../database/interfaces';
 import { ProvincesService } from '../provinces/provinces.service';
 import { TenantsService } from '../tenants/tenants.service';
 
@@ -35,56 +23,45 @@ export class VehiclesService {
   ) {}
 
   async getVehicles(query: GetVehiclesQueryDto) {
-    const {
-      page,
-      limit,
-      offset,
-      provinceIds,
-      vehicleTypeIds,
-      vehicleBrandIds,
-      includeNullBrand,
-      keyword,
-    } = query;
+    const { page, limit, offset, ...conditions } = query;
 
-    const conditions: (SQL | undefined)[] = [];
+    const rawWhereClause: FindManyWhere<'vehicles'>['RAW'] = Object.values(
+      conditions,
+    ).some((value) => value !== undefined)
+      ? (table, { and, ilike, inArray, isNull, or }) => {
+          const {
+            provinceIds,
+            vehicleTypeIds,
+            vehicleBrandIds,
+            includeNullBrand,
+            keyword,
+          } = conditions;
 
-    if (keyword) {
-      conditions.push(
-        or(
-          ilike(
-            concat(vehicles.licensePlatePrefix, vehicles.licensePlateNumber),
-            `%${keyword}%`,
-          ),
-          ilike(vehicles.note, `%${keyword}%`),
-        ),
-      );
-    }
-
-    if (provinceIds) {
-      conditions.push(inArray(vehicles.provinceId, provinceIds));
-    }
-
-    if (vehicleTypeIds) {
-      conditions.push(inArray(vehicles.vehicleTypeId, vehicleTypeIds));
-    }
-
-    const vehicleBrandIdsConditions: (SQL | undefined)[] = [];
-
-    if (vehicleBrandIds) {
-      vehicleBrandIdsConditions.push(
-        inArray(vehicles.vehicleBrandId, vehicleBrandIds),
-      );
-    }
-
-    if (includeNullBrand) {
-      vehicleBrandIdsConditions.push(isNull(vehicles.vehicleBrandId));
-    }
-
-    if (vehicleBrandIdsConditions.length > 0) {
-      conditions.push(or(...vehicleBrandIdsConditions));
-    }
-
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+          return and(
+            provinceIds ? inArray(table.provinceId, provinceIds) : undefined,
+            vehicleTypeIds
+              ? inArray(table.vehicleTypeId, vehicleTypeIds)
+              : undefined,
+            vehicleBrandIds || includeNullBrand
+              ? or(
+                  vehicleBrandIds
+                    ? inArray(table.vehicleBrandId, vehicleBrandIds)
+                    : undefined,
+                  includeNullBrand ? isNull(table.vehicleBrandId) : undefined,
+                )
+              : undefined,
+            keyword
+              ? or(
+                  ilike(
+                    concat(table.licensePlatePrefix, table.licensePlateNumber),
+                    `%${keyword}%`,
+                  ),
+                  ilike(table.note, `%${keyword}%`),
+                )
+              : undefined,
+          )!;
+        }
+      : undefined;
 
     const [result, total] = await Promise.all([
       this.db.query.vehicles.findMany({
@@ -94,7 +71,9 @@ export class VehiclesService {
           createdAt: false,
           updatedAt: false,
         },
-        where: whereClause,
+        where: {
+          RAW: rawWhereClause,
+        },
         with: {
           tenant: {
             columns: {
@@ -103,16 +82,22 @@ export class VehiclesService {
             },
           },
         },
-        orderBy: [desc(vehicles.updatedAt), asc(vehicles.vehicleId)],
+        orderBy: {
+          updatedAt: 'desc',
+          vehicleId: 'asc',
+        },
         limit,
         offset,
       }),
-      this.db.select({ total: count() }).from(vehicles).where(whereClause),
+      this.db.$count(
+        vehicles,
+        rawWhereClause && rawWhereClause(vehicles, operators),
+      ),
     ]);
 
     return {
       vehicles: result,
-      pagination: new PaginationMetaDto(page, limit, total[0].total),
+      pagination: new PaginationMetaDto(page, limit, total),
     };
   }
 
@@ -121,7 +106,9 @@ export class VehiclesService {
       columns: {
         tenantId: false,
       },
-      where: eq(vehicles.vehicleId, vehicleId),
+      where: {
+        vehicleId: { eq: vehicleId },
+      },
       with: {
         tenant: {
           columns: {
@@ -173,7 +160,9 @@ export class VehiclesService {
           tenantId: false,
           updatedAt: false,
         },
-        where: eq(vehicles.vehicleId, createdVehicle[0].vehicleId),
+        where: {
+          vehicleId: { eq: createdVehicle[0].vehicleId },
+        },
         with: {
           tenant: {
             columns: {
@@ -235,7 +224,9 @@ export class VehiclesService {
           tenantId: false,
           createdAt: false,
         },
-        where: eq(vehicles.vehicleId, updatedVehicle[0].vehicleId),
+        where: {
+          vehicleId: { eq: updatedVehicle[0].vehicleId },
+        },
         with: {
           tenant: {
             columns: {
@@ -305,7 +296,7 @@ export class VehiclesService {
 
     foreignKeyFields.forEach(({ field, value }, index) => {
       if (
-        value &&
+        value != null &&
         results[index].status === 'rejected' &&
         results[index].reason instanceof NotFoundException
       ) {
@@ -334,7 +325,6 @@ export class VehiclesService {
       return;
     }
 
-    const conditions: (SQL | undefined)[] = [];
     const uniqueFields = [
       {
         field: 'licensePlatePrefix',
@@ -353,55 +343,59 @@ export class VehiclesService {
       },
     ] as const;
 
+    const whereClause: FindManyWhere<'vehicles'>['AND'] = [];
+
     if (licensePlatePrefix && licensePlateNumber && provinceId) {
-      conditions.push(
-        and(
-          eq(vehicles.licensePlatePrefix, licensePlatePrefix),
-          eq(vehicles.licensePlateNumber, licensePlateNumber),
-          eq(vehicles.provinceId, provinceId),
-        ),
+      whereClause.push(
+        { licensePlatePrefix: { eq: licensePlatePrefix } },
+        { licensePlateNumber: { eq: licensePlateNumber } },
+        { provinceId: { eq: provinceId } },
       );
     } else if (excludeVehicleId) {
       const excludeVehicle = await this.db.query.vehicles.findFirst({
-        where: eq(vehicles.vehicleId, excludeVehicleId),
+        columns: {
+          licensePlatePrefix: true,
+          licensePlateNumber: true,
+          provinceId: true,
+        },
+        where: {
+          vehicleId: { eq: excludeVehicleId },
+        },
       });
 
       if (!excludeVehicle) {
         throw NotFound('vehicle');
       }
 
-      conditions.push(
-        and(
-          eq(
-            vehicles.licensePlatePrefix,
-            licensePlatePrefix ?? excludeVehicle.licensePlatePrefix,
-          ),
-          eq(
-            vehicles.licensePlateNumber,
-            licensePlateNumber ?? excludeVehicle.licensePlateNumber,
-          ),
-          eq(vehicles.provinceId, provinceId ?? excludeVehicle.provinceId),
-        ),
-      );
+      whereClause.push({
+        licensePlatePrefix: {
+          eq: licensePlatePrefix ?? excludeVehicle.licensePlatePrefix,
+        },
+        licensePlateNumber: {
+          eq: licensePlateNumber ?? excludeVehicle.licensePlateNumber,
+        },
+        provinceId: {
+          eq: provinceId ?? excludeVehicle.provinceId,
+        },
+      });
     } else {
       const fields = uniqueFields
-        .filter(({ value }) => !value)
+        .filter(({ value }) => value == null)
         .map((field) => field.field);
 
       throw Required(...fields);
     }
 
-    const whereClause = excludeVehicleId
-      ? and(ne(vehicles.vehicleId, excludeVehicleId), or(...conditions))
-      : or(...conditions);
-
     const existingVehicles = await this.db.query.vehicles.findMany({
-      where: whereClause,
+      where: {
+        AND: [{ vehicleId: { ne: excludeVehicleId } }, ...whereClause],
+      },
     });
 
     const conflicts = uniqueFields.filter(
       ({ key, value }) =>
-        value && existingVehicles.some((vehicle) => vehicle[key] === value),
+        value != null &&
+        existingVehicles.some((vehicle) => vehicle[key] === value),
     );
 
     if (conflicts.length > 0) {

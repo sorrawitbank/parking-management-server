@@ -1,9 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
 import { NotFound } from '../../common/errors/throw';
 import DATABASE_CONNECTION from '../../database/database-connection';
-import { vehicleBrands } from '../../database/database.schemas';
-import type Database from '../../database/interfaces/database.interface';
+import { type Database } from '../../database/interfaces';
 
 @Injectable()
 export class BrandsService {
@@ -14,7 +12,9 @@ export class BrandsService {
       columns: {
         vehicleBrandId: true,
       },
-      where: eq(vehicleBrands.vehicleBrandId, vehicleBrandId),
+      where: {
+        vehicleBrandId: { eq: vehicleBrandId },
+      },
     });
 
     if (!vehicleBrand) {

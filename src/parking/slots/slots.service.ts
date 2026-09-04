@@ -1,12 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
 import { NotFound } from '../../common/errors/throw';
 import DATABASE_CONNECTION from '../../database/database-connection';
-import {
-  parkingSlots,
-  parkingSlotsWithStatus,
-} from '../../database/database.schemas';
-import type Database from '../../database/interfaces/database.interface';
+import { type Database } from '../../database/interfaces';
 
 @Injectable()
 export class SlotsService {
@@ -17,7 +12,9 @@ export class SlotsService {
       columns: {
         slotId: true,
       },
-      where: eq(parkingSlots.slotId, slotId),
+      where: {
+        slotId: { eq: slotId },
+      },
     });
 
     if (!parkingSlot) {
@@ -35,19 +32,20 @@ export class SlotsService {
   }
 
   async getParkingSlotsWithStatus() {
-    return this.db.select().from(parkingSlotsWithStatus);
+    return this.db.query.parkingSlotsWithStatus.findMany();
   }
 
   async getParkingSlotsWithStatusById(slotId: string) {
-    const parkingSlot = await this.db
-      .select()
-      .from(parkingSlotsWithStatus)
-      .where(eq(parkingSlotsWithStatus.slotId, slotId));
+    const parkingSlot = await this.db.query.parkingSlotsWithStatus.findFirst({
+      where: {
+        slotId: { eq: slotId },
+      },
+    });
 
-    if (parkingSlot.length === 0) {
+    if (!parkingSlot) {
       throw NotFound('parkingSlot');
     }
 
-    return parkingSlot[0];
+    return parkingSlot;
   }
 }
