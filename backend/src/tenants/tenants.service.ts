@@ -104,12 +104,12 @@ export class TenantsService {
 
     await this.validateTenantUniqueFields({ phone, lineId });
 
-    const createdTenant = await this.db
+    const [createdTenant] = await this.db
       .insert(tenants)
       .values(tenant)
       .returning();
 
-    return createdTenant[0];
+    return createdTenant;
   }
 
   async updateTenant(

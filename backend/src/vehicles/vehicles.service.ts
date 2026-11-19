@@ -150,7 +150,7 @@ export class VehiclesService {
     });
 
     const createdVehicle = await this.db.transaction(async (tx) => {
-      const createdVehicle = await tx
+      const [createdVehicle] = await tx
         .insert(vehicles)
         .values(vehicle)
         .returning({ vehicleId: vehicles.vehicleId });
@@ -161,7 +161,7 @@ export class VehiclesService {
           updatedAt: false,
         },
         where: {
-          vehicleId: { eq: createdVehicle[0].vehicleId },
+          vehicleId: { eq: createdVehicle.vehicleId },
         },
         with: {
           tenant: {

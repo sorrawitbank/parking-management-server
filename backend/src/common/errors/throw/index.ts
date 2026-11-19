@@ -3,3 +3,4 @@ export { default as AlreadyOccupied } from './already-occupied';
 export { default as NotFound } from './not-found';
 export { default as Required } from './required';
 export { default as Unavailable } from './unavailable';
+export { default as Unprocessable } from './unprocessable';

@@ -1,6 +1,5 @@
 import { sql } from 'drizzle-orm';
 import {
-  bigint,
   boolean,
   char,
   check,
@@ -25,10 +24,10 @@ export const userRole = pgEnum('user_role', ['user', 'admin']);
 export const parkingAssignmentSlots = pgTable(
   'parking_assignment_slots',
   {
-    assignmentSlotId: bigint('assignment_slot_id', { mode: 'number' })
+    assignmentSlotId: integer('assignment_slot_id')
       .primaryKey()
       .generatedAlwaysAsIdentity(),
-    assignmentId: bigint('assignment_id', { mode: 'number' })
+    assignmentId: integer('assignment_id')
       .notNull()
       .references(() => parkingAssignments.assignmentId, {
         name: 'parking_assignment_slots_parking_assignments_fk',
@@ -55,7 +54,7 @@ export const parkingAssignmentSlots = pgTable(
     ).using(
       'gist',
       table.assignmentId.asc().nullsLast(),
-      sql`daterange(assigned_date, COALESCE(ended_date, 'infinity'::date), '[]'::text)`,
+      sql`daterange(assigned_date, COALESCE(ended_date, 'infinity'::date), '[)'::text)`,
     ),
     uniqueIndex('parking_assignment_slots_slot_id_active_uq')
       .using('btree', table.slotId.asc().nullsLast())
@@ -63,7 +62,7 @@ export const parkingAssignmentSlots = pgTable(
     index('parking_assignment_slots_slot_id_assigned_ended_date_ex').using(
       'gist',
       table.slotId.asc().nullsLast(),
-      sql`daterange(assigned_date, COALESCE(ended_date, 'infinity'::date), '[]'::text)`,
+      sql`daterange(assigned_date, COALESCE(ended_date, 'infinity'::date), '[)'::text)`,
     ),
     check(
       'parking_assignment_slots_date_range_ck',
@@ -133,7 +132,7 @@ export const parkingAssignmentStatuses = pgTable(
 export const parkingAssignments = pgTable(
   'parking_assignments',
   {
-    assignmentId: bigint('assignment_id', { mode: 'number' })
+    assignmentId: integer('assignment_id')
       .primaryKey()
       .generatedAlwaysAsIdentity(),
     tenantId: uuid('tenant_id')
@@ -480,8 +479,9 @@ export const vehicles = pgTable(
     ),
   ],
 );
+
 export const activeParkingAssignments = pgView('active_parking_assignments', {
-  assignmentId: bigint('assignment_id', { mode: 'number' }).notNull(),
+  assignmentId: integer('assignment_id').notNull(),
   slotId: uuid('slot_id').notNull(),
   assignmentStatusId: integer('assignment_status_id').notNull(),
   paidUntilMonth: date('paid_until_month').notNull(),
@@ -522,10 +522,8 @@ export const nonRentingTenants = pgView('non_renting_tenants', {
 export const parkingAssignmentSlotsWithAssignedDays = pgView(
   'parking_assignment_slots_with_assigned_days',
   {
-    assignmentSlotId: bigint('assignment_slot_id', {
-      mode: 'number',
-    }).notNull(),
-    assignmentId: bigint('assignment_id', { mode: 'number' }).notNull(),
+    assignmentSlotId: integer('assignment_slot_id').notNull(),
+    assignmentId: integer('assignment_id').notNull(),
     slotId: uuid('slot_id').notNull(),
     assignedDate: date('assigned_date').notNull(),
     endedDate: date('ended_date'),
@@ -539,7 +537,7 @@ export const parkingAssignmentSlotsWithAssignedDays = pgView(
 export const parkingAssignmentsWithStats = pgView(
   'parking_assignments_with_stats',
   {
-    assignmentId: bigint('assignment_id', { mode: 'number' }).notNull(),
+    assignmentId: integer('assignment_id').notNull(),
     tenantId: uuid('tenant_id').notNull(),
     paidUntilMonth: date('paid_until_month').notNull(),
     monthlyFee: numeric('monthly_fee', {
@@ -561,7 +559,7 @@ export const parkingAssignmentsWithStats = pgView(
     }).notNull(),
   },
 ).as(
-  sql`SELECT pa.assignment_id, pa.tenant_id, pa.paid_until_month, pa.monthly_fee, assignment_stats.assigned_date, assignment_stats.ended_date, assignment_stats.assigned_days, assignment_stats.is_active, pa.created_at, pa.updated_at FROM parking_assignments pa JOIN ( SELECT pas.assignment_id, min(pas.assigned_date) AS assigned_date, CASE WHEN bool_or(pas.is_active) THEN NULL::date ELSE max(pas.ended_date) END AS ended_date, sum(pas.assigned_days)::integer AS assigned_days, bool_or(pas.is_active) AS is_active FROM parking_assignment_slots_with_assigned_days pas GROUP BY pas.assignment_id) assignment_stats ON assignment_stats.assignment_id = pa.assignment_id`,
+  sql`SELECT pa.assignment_id, pa.tenant_id, pa.paid_until_month, pa.monthly_fee, assignment_stats.assigned_date, assignment_stats.ended_date, assignment_stats.assigned_days, assignment_stats.is_active, pa.created_at, pa.updated_at FROM parking_assignments pa JOIN ( SELECT pas.assignment_id, min(pas.assigned_date) AS assigned_date, CASE WHEN bool_or(pas.is_active) THEN NULL::date ELSE max(pas.ended_date) END AS ended_date, (sum(pas.assigned_days) - count(*) + 1)::integer AS assigned_days, bool_or(pas.is_active) AS is_active FROM parking_assignment_slots_with_assigned_days pas GROUP BY pas.assignment_id) assignment_stats ON assignment_stats.assignment_id = pa.assignment_id`,
 );
 
 export const parkingSlotsWithStatus = pgView('parking_slots_with_status', {

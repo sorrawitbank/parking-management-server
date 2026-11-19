@@ -18,7 +18,7 @@ export class SlotsService {
     });
 
     if (!parkingSlot) {
-      throw NotFound('parkingSlot');
+      throw NotFound('slot');
     }
   }
 
@@ -43,7 +43,7 @@ export class SlotsService {
     });
 
     if (!parkingSlot) {
-      throw NotFound('parkingSlot');
+      throw NotFound('slot');
     }
 
     return parkingSlot;
