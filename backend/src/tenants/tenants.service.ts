@@ -2,7 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { eq, operators } from 'drizzle-orm';
 import { GetTenantsQueryDto } from './dto/get-tenants-query.dto';
 import { PaginationMetaDto } from '../common/dto/pagination-meta.dto';
-import { AlreadyExists, NotFound, Required } from '../common/errors/throw';
+import {
+  AlreadyExists,
+  NotFound,
+  Required,
+  Unprocessable,
+} from '../common/errors/throw';
 import DATABASE_CONNECTION from '../database/database-connection';
 import { tenants } from '../database/database.schemas';
 import { FindManyWhere, type Database } from '../database/interfaces';
@@ -142,6 +147,19 @@ export class TenantsService {
   }
 
   async deleteTenant(tenantId: string) {
+    const assignment = await this.db.query.parkingAssignments.findFirst({
+      columns: {
+        assignmentId: true,
+      },
+      where: {
+        tenantId: { eq: tenantId },
+      },
+    });
+
+    if (assignment) {
+      throw Unprocessable('tenant');
+    }
+
     const deletedTenant = await this.db
       .delete(tenants)
       .where(eq(tenants.tenantId, tenantId))
