@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AssignmentsModule as ParkingAssignmentsModule } from './parking/assignments/assignments.module';
+import { CalculationsModule as ParkingAssignmentCalculationsModule } from './parking/assignments/calulations/calculations.module';
 import { StatusesModule as ParkingAssignmentStatusesModule } from './parking/assignments/statuses/statuses.module';
 import { SlotsModule as ParkingSlotsModule } from './parking/slots/slots.module';
 import { StatusesModule as ParkingSlotStatusesModule } from './parking/slots/statuses/statuses.module';
@@ -19,6 +20,7 @@ import { VehiclesModule } from './vehicles/vehicles.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
+    ParkingAssignmentCalculationsModule,
     ParkingAssignmentStatusesModule,
     ParkingAssignmentsModule,
     ParkingSlotStatusesModule,
@@ -36,6 +38,10 @@ import { VehiclesModule } from './vehicles/vehicles.module';
             path: 'assignments',
             module: ParkingAssignmentsModule,
             children: [
+              {
+                path: 'calculations',
+                module: ParkingAssignmentCalculationsModule,
+              },
               {
                 path: 'statuses',
                 module: ParkingAssignmentStatusesModule,

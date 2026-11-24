@@ -1,13 +1,20 @@
 import { Module } from '@nestjs/common';
 import { AssignmentsController } from './assignments.controller';
 import { AssignmentsService } from './assignments.service';
+import { CalculationsModule } from './calulations/calculations.module';
 import { StatusesModule } from './statuses/statuses.module';
 import { SlotsModule } from '../slots/slots.module';
 import { DatabaseModule } from '../../database/database.module';
 import { TenantsModule } from '../../tenants/tenants.module';
 
 @Module({
-  imports: [DatabaseModule, SlotsModule, StatusesModule, TenantsModule],
+  imports: [
+    DatabaseModule,
+    CalculationsModule,
+    SlotsModule,
+    StatusesModule,
+    TenantsModule,
+  ],
   controllers: [AssignmentsController],
   providers: [AssignmentsService],
 })
