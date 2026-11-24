@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { RouterModule } from '@nestjs/core';
 import { AppController } from './app.controller';
@@ -9,6 +9,7 @@ import { StatusesModule as ParkingAssignmentStatusesModule } from './parking/ass
 import { SlotsModule as ParkingSlotsModule } from './parking/slots/slots.module';
 import { StatusesModule as ParkingSlotStatusesModule } from './parking/slots/statuses/statuses.module';
 import { ProvincesModule } from './provinces/provinces.module';
+import { RequestLoggerMiddleware } from './request-logger.middleware';
 import { TenantsModule } from './tenants/tenants.module';
 import { BrandsModule as VehicleBrandsModule } from './vehicles/brands/brands.module';
 import { TypesModule as VehicleTypesModule } from './vehicles/types/types.module';
@@ -80,4 +81,8 @@ import { VehiclesModule } from './vehicles/vehicles.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+  }
+}
