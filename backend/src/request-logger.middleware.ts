@@ -1,17 +1,16 @@
 import { Injectable, Logger, NestMiddleware } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
+import { EnvironmentService } from './common/services/environment.service';
 
 @Injectable()
 export class RequestLoggerMiddleware implements NestMiddleware {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly environmentService: EnvironmentService) {}
 
   private readonly logger = new Logger('HTTP');
 
   use(req: Request, res: Response, next: NextFunction) {
     const { method, originalUrl, ip } = req;
     const start = Date.now();
-    const isProd = this.configService.get('NODE_ENV') === 'production';
 
     res.on('finish', () => {
       const { statusCode } = res;
@@ -19,7 +18,7 @@ export class RequestLoggerMiddleware implements NestMiddleware {
       const message = `${method} ${originalUrl} ${statusCode} +${duration}ms - ${ip}`;
 
       // Don't log successful requests in production
-      if (isProd && statusCode < 400) {
+      if (this.environmentService.isProd && statusCode < 400) {
         return;
       }
 

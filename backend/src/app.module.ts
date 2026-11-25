@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { RouterModule } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CommonModule } from './common/common.module';
 import { DatabaseModule } from './database/database.module';
 import { AssignmentsModule as ParkingAssignmentsModule } from './modules/parking/assignments/assignments.module';
 import { CalculationsModule as ParkingAssignmentCalculationsModule } from './modules/parking/assignments/calulations/calculations.module';
@@ -19,6 +20,7 @@ import { RequestLoggerMiddleware } from './request-logger.middleware';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    CommonModule,
     DatabaseModule,
     ParkingAssignmentCalculationsModule,
     ParkingAssignmentStatusesModule,
