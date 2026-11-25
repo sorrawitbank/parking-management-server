@@ -8,7 +8,7 @@ import {
   Required,
   Unprocessable,
 } from '../../common/errors/throw';
-import DATABASE_CONNECTION from '../../database/database-connection';
+import { DATABASE_CONNECTION } from '../../database/database.constants';
 import { tenants } from '../../database/database.schemas';
 import { FindManyWhere, type Database } from '../../database/interfaces';
 

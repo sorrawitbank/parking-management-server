@@ -8,7 +8,7 @@ import { ProvincesService } from '../provinces/provinces.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { PaginationMetaDto } from '../../common/dto/pagination-meta.dto';
 import { AlreadyExists, NotFound, Required } from '../../common/errors/throw';
-import DATABASE_CONNECTION from '../../database/database-connection';
+import { DATABASE_CONNECTION } from '../../database/database.constants';
 import { vehicles } from '../../database/database.schemas';
 import { FindManyWhere, type Database } from '../../database/interfaces';
 

@@ -17,7 +17,7 @@ import {
   Unprocessable,
 } from '../../../common/errors/throw';
 import { toStartOfDayUtc } from '../../../common/utils';
-import DATABASE_CONNECTION from '../../../database/database-connection';
+import { DATABASE_CONNECTION } from '../../../database/database.constants';
 import {
   parkingAssignments,
   parkingAssignmentSlots,
