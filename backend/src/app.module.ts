@@ -4,17 +4,17 @@ import { RouterModule } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
-import { AssignmentsModule as ParkingAssignmentsModule } from './parking/assignments/assignments.module';
-import { CalculationsModule as ParkingAssignmentCalculationsModule } from './parking/assignments/calulations/calculations.module';
-import { StatusesModule as ParkingAssignmentStatusesModule } from './parking/assignments/statuses/statuses.module';
-import { SlotsModule as ParkingSlotsModule } from './parking/slots/slots.module';
-import { StatusesModule as ParkingSlotStatusesModule } from './parking/slots/statuses/statuses.module';
-import { ProvincesModule } from './provinces/provinces.module';
+import { AssignmentsModule as ParkingAssignmentsModule } from './modules/parking/assignments/assignments.module';
+import { CalculationsModule as ParkingAssignmentCalculationsModule } from './modules/parking/assignments/calulations/calculations.module';
+import { StatusesModule as ParkingAssignmentStatusesModule } from './modules/parking/assignments/statuses/statuses.module';
+import { SlotsModule as ParkingSlotsModule } from './modules/parking/slots/slots.module';
+import { StatusesModule as ParkingSlotStatusesModule } from './modules/parking/slots/statuses/statuses.module';
+import { ProvincesModule } from './modules/provinces/provinces.module';
+import { TenantsModule } from './modules/tenants/tenants.module';
+import { BrandsModule as VehicleBrandsModule } from './modules/vehicles/brands/brands.module';
+import { TypesModule as VehicleTypesModule } from './modules/vehicles/types/types.module';
+import { VehiclesModule } from './modules/vehicles/vehicles.module';
 import { RequestLoggerMiddleware } from './request-logger.middleware';
-import { TenantsModule } from './tenants/tenants.module';
-import { BrandsModule as VehicleBrandsModule } from './vehicles/brands/brands.module';
-import { TypesModule as VehicleTypesModule } from './vehicles/types/types.module';
-import { VehiclesModule } from './vehicles/vehicles.module';
 
 @Module({
   imports: [
