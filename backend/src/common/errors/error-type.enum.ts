@@ -12,6 +12,12 @@
  * - `NOT_FOUND` - Record not found - Example: `@IsNotEmpty`
  * - `ALREADY_EXISTS` - Value already exists
  * - `ALREADY_OCCUPIED` - Value already occupied
+ * - `UNPROCESSABLE` - The request is unprocessable
+ * - `MISSING_TOKEN` - The request is missing a token
+ * - `INVALID_TOKEN` - The request has an invalid token
+ * - `INVALID_CREDENTIALS` - The request has invalid credentials
+ * - `NOT_AUTHORIZED` - The request is not authorized
+ * - `FORBIDDEN` - The request is forbidden
  */
 enum ErrorType {
   REQUIRED = 'REQUIRED',
@@ -27,6 +33,11 @@ enum ErrorType {
   ALREADY_EXISTS = 'ALREADY_EXISTS',
   ALREADY_OCCUPIED = 'ALREADY_OCCUPIED',
   UNPROCESSABLE = 'UNPROCESSABLE',
+  MISSING_TOKEN = 'MISSING_TOKEN',
+  INVALID_TOKEN = 'INVALID_TOKEN',
+  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
+  NOT_AUTHORIZED = 'NOT_AUTHORIZED',
+  FORBIDDEN = 'FORBIDDEN',
 }
 
 export default ErrorType;

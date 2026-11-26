@@ -5,7 +5,7 @@ import { toScreamingSnake } from '../../../common/utils';
 /**
  * Return a conflict exception with the properties and the error type
  *
- * @param properties - The properties that unavailable
+ * @param properties - The properties that are unavailable
  * @returns A conflict exception with the properties and the error type
  */
 function Unavailable(...properties: string[]) {
