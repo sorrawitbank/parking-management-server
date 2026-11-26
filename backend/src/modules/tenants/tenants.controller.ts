@@ -1,0 +1,79 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
+import { CreateTenantResponseDto } from './dto/create-tenant-response.dto';
+import { CreateTenantDto } from './dto/create-tenant.dto';
+import { GetTenantResponseDto } from './dto/get-tenant-response.dto';
+import { GetTenantsQueryDto } from './dto/get-tenants-query.dto';
+import {
+  GetTenantsResponse,
+  GetTenantsResponseDto,
+} from './dto/get-tenants-response.dto';
+import { TenantIdDto } from './dto/tenant-id.dto';
+import { UpdateTenantResponseDto } from './dto/update-tenant-response.dto';
+import { UpdateTenantDto } from './dto/update-tenant.dto';
+import { TenantsService } from './tenants.service';
+
+@Controller()
+export class TenantsController {
+  constructor(private readonly tenantsService: TenantsService) {}
+
+  @Get()
+  async getTenants(
+    @Query() query: GetTenantsQueryDto,
+  ): Promise<GetTenantsResponseDto> {
+    const { tenants, pagination } = await this.tenantsService.getTenants(query);
+
+    return {
+      data: plainToInstance(GetTenantsResponse, tenants),
+      pagination,
+    };
+  }
+
+  @Get(':tenantId')
+  async getTenantById(
+    @Param() params: TenantIdDto,
+  ): Promise<GetTenantResponseDto> {
+    const tenant = await this.tenantsService.getTenantById(params.tenantId);
+
+    return plainToInstance(GetTenantResponseDto, tenant);
+  }
+
+  @Post()
+  async createTenant(
+    @Body() body: CreateTenantDto,
+  ): Promise<CreateTenantResponseDto> {
+    const createdTenant = await this.tenantsService.createTenant(body);
+
+    return plainToInstance(CreateTenantResponseDto, createdTenant);
+  }
+
+  @Put(':tenantId')
+  async updateTenant(
+    @Param() params: TenantIdDto,
+    @Body() body: UpdateTenantDto,
+  ): Promise<UpdateTenantResponseDto> {
+    const updatedTenant = await this.tenantsService.updateTenant(
+      params.tenantId,
+      body,
+    );
+
+    return plainToInstance(UpdateTenantResponseDto, updatedTenant);
+  }
+
+  @Delete(':tenantId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteTenant(@Param() params: TenantIdDto): Promise<void> {
+    await this.tenantsService.deleteTenant(params.tenantId);
+  }
+}

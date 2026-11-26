@@ -1,0 +1,588 @@
+import { sql } from 'drizzle-orm';
+import {
+  boolean,
+  char,
+  check,
+  date,
+  index,
+  integer,
+  numeric,
+  pgEnum,
+  pgTable,
+  pgView,
+  text,
+  timestamp,
+  unique,
+  uniqueIndex,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
+import { int4range } from './customs/int4range';
+
+export const userRole = pgEnum('user_role', ['user', 'admin']);
+
+export const parkingAssignmentSlots = pgTable(
+  'parking_assignment_slots',
+  {
+    assignmentSlotId: integer('assignment_slot_id')
+      .primaryKey()
+      .generatedAlwaysAsIdentity(),
+    assignmentId: integer('assignment_id')
+      .notNull()
+      .references(() => parkingAssignments.assignmentId, {
+        name: 'parking_assignment_slots_parking_assignments_fk',
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
+    slotId: uuid('slot_id')
+      .notNull()
+      .references(() => parkingSlots.slotId, {
+        name: 'parking_assignment_slots_parking_slots_fk',
+        onDelete: 'restrict',
+        onUpdate: 'cascade',
+      }),
+    assignedDate: date('assigned_date').notNull(),
+    endedDate: date('ended_date'),
+    isActive: boolean('is_active').default(true).notNull(),
+  },
+  (table) => [
+    uniqueIndex('parking_assignment_slots_assignment_id_active_uq')
+      .using('btree', table.assignmentId.asc().nullsLast())
+      .where(sql`is_active`),
+    index(
+      'parking_assignment_slots_assignment_id_assigned_ended_date_ex',
+    ).using(
+      'gist',
+      table.assignmentId.asc().nullsLast(),
+      sql`daterange(assigned_date, COALESCE(ended_date, 'infinity'::date), '[)'::text)`,
+    ),
+    uniqueIndex('parking_assignment_slots_slot_id_active_uq')
+      .using('btree', table.slotId.asc().nullsLast())
+      .where(sql`is_active`),
+    index('parking_assignment_slots_slot_id_assigned_ended_date_ex').using(
+      'gist',
+      table.slotId.asc().nullsLast(),
+      sql`daterange(assigned_date, COALESCE(ended_date, 'infinity'::date), '[)'::text)`,
+    ),
+    check(
+      'parking_assignment_slots_date_range_ck',
+      sql`((ended_date IS NULL) OR (ended_date >= assigned_date))`,
+    ),
+    check(
+      'parking_assignment_slots_is_active_ended_date_ck',
+      sql`(((is_active = true) AND (ended_date IS NULL)) OR ((is_active = false) AND (ended_date IS NOT NULL)))`,
+    ),
+  ],
+);
+
+export const parkingAssignmentStatuses = pgTable(
+  'parking_assignment_statuses',
+  {
+    assignmentStatusId: integer('assignment_status_id').primaryKey(),
+    nameTh: varchar('name_th', { length: 100 }).notNull(),
+    nameEn: varchar('name_en', { length: 100 }).notNull(),
+    backgroundColorLight: char('background_color_light', {
+      length: 7,
+    }).notNull(),
+    backgroundColorDark: char('background_color_dark', { length: 7 }).notNull(),
+    textColorLight: char('text_color_light', { length: 7 }).notNull(),
+    textColorDark: char('text_color_dark', { length: 7 }).notNull(),
+    monthDiffRange: int4range('month_diff_range').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    index('parking_assignment_statuses_month_diff_range_ex').using(
+      'gist',
+      table.monthDiffRange.asc().nullsLast(),
+    ),
+    unique('parking_assignment_statuses_name_en_uq').on(table.nameEn),
+    unique('parking_assignment_statuses_name_th_uq').on(table.nameTh),
+    check(
+      'parking_assignment_statuses_background_color_dark_ck',
+      sql`(background_color_dark ~ '^#[A-F0-9]{6}$'::text)`,
+    ),
+    check(
+      'parking_assignment_statuses_background_color_light_ck',
+      sql`(background_color_light ~ '^#[A-F0-9]{6}$'::text)`,
+    ),
+    check(
+      'parking_assignment_statuses_name_en_ck',
+      sql`(length(TRIM(BOTH FROM name_en)) >= 2)`,
+    ),
+    check(
+      'parking_assignment_statuses_name_th_ck',
+      sql`(length(TRIM(BOTH FROM name_th)) >= 2)`,
+    ),
+    check(
+      'parking_assignment_statuses_text_color_dark_ck',
+      sql`(text_color_dark ~ '^#[A-F0-9]{6}$'::text)`,
+    ),
+    check(
+      'parking_assignment_statuses_text_color_light_ck',
+      sql`(text_color_light ~ '^#[A-F0-9]{6}$'::text)`,
+    ),
+  ],
+);
+
+export const parkingAssignments = pgTable(
+  'parking_assignments',
+  {
+    assignmentId: integer('assignment_id')
+      .primaryKey()
+      .generatedAlwaysAsIdentity(),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.tenantId, {
+        name: 'parking_assignments_tenants_fk',
+        onDelete: 'restrict',
+        onUpdate: 'cascade',
+      }),
+    paidUntilMonth: date('paid_until_month').notNull(),
+    monthlyFee: numeric('monthly_fee', {
+      precision: 6,
+      scale: 2,
+      mode: 'number',
+    }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    check(
+      'parking_assignments_monthly_fee_ck',
+      sql`(monthly_fee >= (0)::numeric)`,
+    ),
+    check(
+      'parking_assignments_paid_until_month_ck',
+      sql`(((date_trunc('month'::text, (paid_until_month)::timestamp with time zone) + '1 mon'::interval) - '1 day'::interval) = paid_until_month)`,
+    ),
+  ],
+);
+
+export const parkingSlotStatuses = pgTable(
+  'parking_slot_statuses',
+  {
+    slotStatusId: integer('slot_status_id').primaryKey(),
+    nameTh: varchar('name_th', { length: 100 }).notNull(),
+    nameEn: varchar('name_en', { length: 100 }).notNull(),
+    backgroundColorLight: char('background_color_light', {
+      length: 7,
+    }).notNull(),
+    backgroundColorDark: char('background_color_dark', { length: 7 }).notNull(),
+    textColorLight: char('text_color_light', { length: 7 }).notNull(),
+    textColorDark: char('text_color_dark', { length: 7 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    unique('parking_slot_statuses_name_en_uq').on(table.nameEn),
+    unique('parking_slot_statuses_name_th_uq').on(table.nameTh),
+    check(
+      'parking_slot_statuses_background_color_dark_ck',
+      sql`(background_color_dark ~ '^#[A-F0-9]{6}$'::text)`,
+    ),
+    check(
+      'parking_slot_statuses_background_color_light_ck',
+      sql`(background_color_light ~ '^#[A-F0-9]{6}$'::text)`,
+    ),
+    check(
+      'parking_slot_statuses_name_en_ck',
+      sql`(length(TRIM(BOTH FROM name_en)) >= 2)`,
+    ),
+    check(
+      'parking_slot_statuses_name_th_ck',
+      sql`(length(TRIM(BOTH FROM name_th)) >= 2)`,
+    ),
+    check(
+      'parking_slot_statuses_text_color_dark_ck',
+      sql`(text_color_dark ~ '^#[A-F0-9]{6}$'::text)`,
+    ),
+    check(
+      'parking_slot_statuses_text_color_light_ck',
+      sql`(text_color_light ~ '^#[A-F0-9]{6}$'::text)`,
+    ),
+  ],
+);
+
+export const parkingSlots = pgTable(
+  'parking_slots',
+  {
+    slotId: uuid('slot_id')
+      .default(sql`uuid_generate_v4()`)
+      .primaryKey(),
+    slotNo: integer('slot_no').notNull(),
+    slotCode: varchar('slot_code', { length: 8 }).notNull(),
+    positionLeft: integer('position_left').notNull(),
+    positionTop: integer('position_top').notNull(),
+    width: integer().default(1).notNull(),
+    height: integer().default(1).notNull(),
+    isUnavailable: boolean('is_unavailable').default(false).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    index('parking_slots_position_ex').using(
+      'gist',
+      sql`int4range(position_left, (position_left + width), '[)'::text)`,
+      sql`int4range(position_top, (position_top + height), '[)'::text)`,
+    ),
+    unique('parking_slots_slot_code_uq').on(table.slotCode),
+    unique('parking_slots_slot_no_uq').on(table.slotNo),
+    check(
+      'parking_slots_slot_code_ck',
+      sql`((slot_code)::text ~ '^[A-Z0-9]+$'::text)`,
+    ),
+    check('parking_slots_slot_no_ck', sql`(slot_no > 0)`),
+    check(
+      'parking_slots_x_axis_ck',
+      sql`((position_left >= 0) AND (width > 0))`,
+    ),
+    check(
+      'parking_slots_y_axis_ck',
+      sql`((position_top >= 0) AND (height > 0))`,
+    ),
+  ],
+);
+
+export const provinces = pgTable(
+  'provinces',
+  {
+    provinceId: integer('province_id').primaryKey(),
+    nameTh: varchar('name_th', { length: 120 }).notNull(),
+    nameEn: varchar('name_en', { length: 120 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    unique('provinces_name_en_uq').on(table.nameEn),
+    unique('provinces_name_th_uq').on(table.nameTh),
+    check('provinces_name_en_ck', sql`(length(TRIM(BOTH FROM name_en)) >= 2)`),
+    check('provinces_name_th_ck', sql`(length(TRIM(BOTH FROM name_th)) >= 2)`),
+  ],
+);
+
+export const tenants = pgTable(
+  'tenants',
+  {
+    tenantId: uuid('tenant_id')
+      .default(sql`uuid_generate_v4()`)
+      .primaryKey(),
+    name: varchar({ length: 100 }).notNull(),
+    phone: varchar({ length: 10 }),
+    lineId: varchar('line_id', { length: 20 }),
+    note: varchar({ length: 500 }),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    unique('tenants_line_id_uq').on(table.lineId),
+    unique('tenants_phone_uq').on(table.phone),
+    check(
+      'tenants_line_id_ck',
+      sql`((line_id IS NULL) OR ((line_id)::text ~ '^[a-z0-9._-]{4,20}$'::text))`,
+    ),
+    check('tenants_name_ck', sql`(length(TRIM(BOTH FROM name)) >= 2)`),
+    check(
+      'tenants_note_ck',
+      sql`((note IS NULL) OR (length(TRIM(BOTH FROM note)) > 0))`,
+    ),
+    check(
+      'tenants_phone_ck',
+      sql`((phone IS NULL) OR ((phone)::text ~ '^0[1-9]{1}\d{7,8}$'::text))`,
+    ),
+  ],
+);
+
+export const users = pgTable(
+  'users',
+  {
+    userId: uuid('user_id').primaryKey(),
+    role: userRole().default('user').notNull(),
+    email: text().notNull(),
+    phone: varchar({ length: 10 }).notNull(),
+    firstName: varchar('first_name', { length: 100 }).notNull(),
+    lastName: varchar('last_name', { length: 100 }).notNull(),
+    nickName: varchar('nick_name', { length: 100 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    unique('users_email_uq').on(table.email),
+    unique('users_first_last_name_uq').on(table.firstName, table.lastName),
+    unique('users_phone_uq').on(table.phone),
+    check(
+      'users_email_ck',
+      sql`(email ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'::text)`,
+    ),
+    check(
+      'users_first_name_ck',
+      sql`(length(TRIM(BOTH FROM first_name)) >= 2)`,
+    ),
+    check('users_last_name_ck', sql`(length(TRIM(BOTH FROM last_name)) >= 2)`),
+    check('users_nick_name_ck', sql`(length(TRIM(BOTH FROM nick_name)) >= 2)`),
+    check('users_phone_ck', sql`((phone)::text ~ '^0[1-9]{1}\d{7,8}$'::text)`),
+  ],
+);
+
+export const vehicleBrands = pgTable(
+  'vehicle_brands',
+  {
+    vehicleBrandId: integer('vehicle_brand_id')
+      .primaryKey()
+      .generatedAlwaysAsIdentity(),
+    nameTh: varchar('name_th', { length: 100 }).notNull(),
+    nameEn: varchar('name_en', { length: 100 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    unique('vehicle_brands_name_en_uq').on(table.nameEn),
+    unique('vehicle_brands_name_th_uq').on(table.nameTh),
+    check(
+      'vehicle_brands_name_en_ck',
+      sql`(length(TRIM(BOTH FROM name_en)) >= 2)`,
+    ),
+    check(
+      'vehicle_brands_name_th_ck',
+      sql`(length(TRIM(BOTH FROM name_th)) >= 2)`,
+    ),
+  ],
+);
+
+export const vehicleTypes = pgTable(
+  'vehicle_types',
+  {
+    vehicleTypeId: integer('vehicle_type_id')
+      .primaryKey()
+      .generatedAlwaysAsIdentity(),
+    nameTh: varchar('name_th', { length: 20 }).notNull(),
+    nameEn: varchar('name_en', { length: 20 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    unique('vehicle_types_name_en_uq').on(table.nameEn),
+    unique('vehicle_types_name_th_uq').on(table.nameTh),
+    check(
+      'vehicle_types_name_en_ck',
+      sql`(length(TRIM(BOTH FROM name_en)) >= 2)`,
+    ),
+    check(
+      'vehicle_types_name_th_ck',
+      sql`(length(TRIM(BOTH FROM name_th)) >= 2)`,
+    ),
+  ],
+);
+
+export const vehicles = pgTable(
+  'vehicles',
+  {
+    vehicleId: uuid('vehicle_id')
+      .default(sql`uuid_generate_v4()`)
+      .primaryKey(),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.tenantId, {
+        name: 'vehicles_tenants_fk',
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
+    licensePlatePrefix: varchar('license_plate_prefix', {
+      length: 10,
+    }).notNull(),
+    licensePlateNumber: varchar('license_plate_number', {
+      length: 10,
+    }).notNull(),
+    provinceId: integer('province_id')
+      .notNull()
+      .references(() => provinces.provinceId, {
+        name: 'vehicles_provinces_fk',
+        onDelete: 'restrict',
+        onUpdate: 'cascade',
+      }),
+    vehicleTypeId: integer('vehicle_type_id')
+      .notNull()
+      .references(() => vehicleTypes.vehicleTypeId, {
+        name: 'vehicles_vehicle_types_fk',
+        onDelete: 'restrict',
+        onUpdate: 'cascade',
+      }),
+    vehicleBrandId: integer('vehicle_brand_id').references(
+      () => vehicleBrands.vehicleBrandId,
+      {
+        name: 'vehicles_vehicle_brands_fk',
+        onDelete: 'set null',
+        onUpdate: 'cascade',
+      },
+    ),
+    note: varchar({ length: 500 }),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    unique('vehicles_license_plate_uq').on(
+      table.licensePlatePrefix,
+      table.licensePlateNumber,
+      table.provinceId,
+    ),
+    check(
+      'vehicles_license_plate_number_ck',
+      sql`((license_plate_number)::text ~ '^\d+$'::text)`,
+    ),
+    check(
+      'vehicles_license_plate_prefix_ck',
+      sql`((license_plate_prefix)::text ~ '^\S+$'::text)`,
+    ),
+    check(
+      'vehicles_note_ck',
+      sql`((note IS NULL) OR (length(TRIM(BOTH FROM note)) > 0))`,
+    ),
+  ],
+);
+
+export const activeParkingAssignments = pgView('active_parking_assignments', {
+  assignmentId: integer('assignment_id').notNull(),
+  slotId: uuid('slot_id').notNull(),
+  assignmentStatusId: integer('assignment_status_id').notNull(),
+  paidUntilMonth: date('paid_until_month').notNull(),
+  monthlyFee: numeric('monthly_fee', {
+    precision: 6,
+    scale: 2,
+    mode: 'number',
+  }).notNull(),
+  assignedDate: date('assigned_date').notNull(),
+  assignedDays: integer('assigned_days').notNull(),
+  tenantId: uuid('tenant_id').notNull(),
+  name: varchar({ length: 100 }).notNull(),
+  phone: varchar({ length: 10 }),
+  lineId: varchar('line_id', { length: 20 }),
+  note: varchar({ length: 500 }),
+}).as(
+  sql`SELECT pa.assignment_id, pas.slot_id, past.assignment_status_id, pa.paid_until_month, pa.monthly_fee, pa.assigned_date, pa.assigned_days, t.tenant_id, t.name, t.phone, t.line_id, t.note FROM parking_assignments_with_stats pa JOIN parking_assignment_slots pas ON pas.is_active AND pas.assignment_id = pa.assignment_id JOIN parking_assignment_statuses past ON past.month_diff_range @> (12::numeric * (EXTRACT(year FROM pa.paid_until_month) - EXTRACT(year FROM CURRENT_DATE)) + EXTRACT(month FROM pa.paid_until_month) - EXTRACT(month FROM CURRENT_DATE))::integer JOIN tenants t ON t.tenant_id = pa.tenant_id`,
+);
+
+export const nonRentingTenants = pgView('non_renting_tenants', {
+  tenantId: uuid('tenant_id').notNull(),
+  name: varchar({ length: 100 }).notNull(),
+  phone: varchar({ length: 10 }),
+  lineId: varchar('line_id', { length: 20 }),
+  note: varchar({ length: 500 }),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'string',
+  }).notNull(),
+  updatedAt: timestamp('updated_at', {
+    withTimezone: true,
+    mode: 'string',
+  }).notNull(),
+}).as(
+  sql`SELECT tenant_id, name, phone, line_id, note, created_at, updated_at FROM tenants t WHERE NOT (EXISTS ( SELECT 1 FROM parking_assignments_with_stats pa WHERE pa.is_active AND pa.tenant_id = t.tenant_id))`,
+);
+
+export const parkingAssignmentSlotsWithAssignedDays = pgView(
+  'parking_assignment_slots_with_assigned_days',
+  {
+    assignmentSlotId: integer('assignment_slot_id').notNull(),
+    assignmentId: integer('assignment_id').notNull(),
+    slotId: uuid('slot_id').notNull(),
+    assignedDate: date('assigned_date').notNull(),
+    endedDate: date('ended_date'),
+    assignedDays: integer('assigned_days').notNull(),
+    isActive: boolean('is_active').notNull(),
+  },
+).as(
+  sql`SELECT assignment_slot_id, assignment_id, slot_id, assigned_date, ended_date, COALESCE(ended_date, CURRENT_DATE) - assigned_date + 1 AS assigned_days, is_active FROM parking_assignment_slots pas`,
+);
+
+export const parkingAssignmentsWithStats = pgView(
+  'parking_assignments_with_stats',
+  {
+    assignmentId: integer('assignment_id').notNull(),
+    tenantId: uuid('tenant_id').notNull(),
+    paidUntilMonth: date('paid_until_month').notNull(),
+    monthlyFee: numeric('monthly_fee', {
+      precision: 6,
+      scale: 2,
+      mode: 'number',
+    }).notNull(),
+    assignedDate: date('assigned_date').notNull(),
+    endedDate: date('ended_date'),
+    assignedDays: integer('assigned_days').notNull(),
+    isActive: boolean('is_active').notNull(),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+      mode: 'string',
+    }).notNull(),
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+      mode: 'string',
+    }).notNull(),
+  },
+).as(
+  sql`SELECT pa.assignment_id, pa.tenant_id, pa.paid_until_month, pa.monthly_fee, assignment_stats.assigned_date, assignment_stats.ended_date, assignment_stats.assigned_days, assignment_stats.is_active, pa.created_at, pa.updated_at FROM parking_assignments pa JOIN ( SELECT pas.assignment_id, min(pas.assigned_date) AS assigned_date, CASE WHEN bool_or(pas.is_active) THEN NULL::date ELSE max(pas.ended_date) END AS ended_date, (sum(pas.assigned_days) - count(*) + 1)::integer AS assigned_days, bool_or(pas.is_active) AS is_active FROM parking_assignment_slots_with_assigned_days pas GROUP BY pas.assignment_id) assignment_stats ON assignment_stats.assignment_id = pa.assignment_id`,
+);
+
+export const parkingSlotsWithStatus = pgView('parking_slots_with_status', {
+  slotId: uuid('slot_id').notNull(),
+  slotStatusId: integer('slot_status_id').notNull(),
+}).as(
+  sql`SELECT ps.slot_id, psst.slot_status_id FROM parking_slots ps JOIN parking_slot_statuses psst ON psst.slot_status_id = CASE WHEN (EXISTS ( SELECT 1 FROM parking_assignment_slots pas WHERE pas.is_active AND pas.slot_id = ps.slot_id)) THEN 2 WHEN NOT ps.is_unavailable THEN 1 ELSE 3 END`,
+);
+
+export const rentingTenants = pgView('renting_tenants', {
+  tenantId: uuid('tenant_id').notNull(),
+  name: varchar({ length: 100 }).notNull(),
+  phone: varchar({ length: 10 }),
+  lineId: varchar('line_id', { length: 20 }),
+  note: varchar({ length: 500 }),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+    mode: 'string',
+  }).notNull(),
+  updatedAt: timestamp('updated_at', {
+    withTimezone: true,
+    mode: 'string',
+  }).notNull(),
+}).as(
+  sql`SELECT tenant_id, name, phone, line_id, note, created_at, updated_at FROM tenants t WHERE (EXISTS ( SELECT 1 FROM parking_assignments_with_stats pa WHERE pa.is_active AND pa.tenant_id = t.tenant_id))`,
+);
