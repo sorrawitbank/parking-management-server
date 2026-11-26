@@ -1,1 +1,1 @@
-CREATE TYPE user_role AS ENUM ('user', 'admin');
+CREATE TYPE user_role AS ENUM ('STAFF', 'ADMIN');

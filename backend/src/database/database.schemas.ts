@@ -19,7 +19,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { int4range } from './customs/int4range';
 
-export const userRole = pgEnum('user_role', ['user', 'admin']);
+export const userRole = pgEnum('user_role', ['STAFF', 'ADMIN']);
 
 export const parkingAssignmentSlots = pgTable(
   'parking_assignment_slots',
@@ -321,12 +321,13 @@ export const users = pgTable(
   'users',
   {
     userId: uuid('user_id').primaryKey(),
-    role: userRole().default('user').notNull(),
     email: text().notNull(),
     phone: varchar({ length: 10 }).notNull(),
     firstName: varchar('first_name', { length: 100 }).notNull(),
     lastName: varchar('last_name', { length: 100 }).notNull(),
     nickName: varchar('nick_name', { length: 100 }).notNull(),
+    role: userRole().default('STAFF').notNull(),
+    isActive: boolean('is_active').notNull().default(true),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),

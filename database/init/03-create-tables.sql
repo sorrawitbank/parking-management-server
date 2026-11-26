@@ -1,11 +1,12 @@
 CREATE TABLE IF NOT EXISTS users (
     user_id UUID,
-    role user_role NOT NULL DEFAULT 'user',
     email TEXT NOT NULL,
     phone VARCHAR(10) NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     nick_name VARCHAR(100) NOT NULL,
+    role user_role NOT NULL DEFAULT 'STAFF',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT users_pk PRIMARY KEY (user_id),
@@ -18,7 +19,11 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT users_first_last_name_uq UNIQUE (first_name, last_name),
     CONSTRAINT users_first_name_ck CHECK (LENGTH(TRIM(first_name)) >= 2),
     CONSTRAINT users_last_name_ck CHECK (LENGTH(TRIM(last_name)) >= 2),
-    CONSTRAINT users_nick_name_ck CHECK (LENGTH(TRIM(nick_name)) >= 2)
+    CONSTRAINT users_nick_name_ck CHECK (LENGTH(TRIM(nick_name)) >= 2),
+    CONSTRAINT users_role_is_active_ck CHECK (
+        role <> 'ADMIN'
+        OR is_active
+    )
 );
 
 CREATE TABLE IF NOT EXISTS tenants (
