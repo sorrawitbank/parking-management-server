@@ -1,10 +1,8 @@
-import { Expose } from 'class-transformer';
+import { IntersectionType } from '@nestjs/mapped-types';
 import { VehicleResponseDto } from './vehicle-response.dto';
+import { AuditResponseDto } from '../../../common/dto/audit-response.dto';
 
-export class GetVehicleResponseDto extends VehicleResponseDto {
-  @Expose()
-  createdAt: string;
-
-  @Expose()
-  updatedAt: string;
-}
+export class GetVehicleResponseDto extends IntersectionType(
+  VehicleResponseDto,
+  AuditResponseDto,
+) {}
