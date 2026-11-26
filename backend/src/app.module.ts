@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CommonModule } from './common/common.module';
 import { DatabaseModule } from './database/database.module';
+import { SupabaseModule } from './infrastructure/supabase/supabase.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { AssignmentsModule as ParkingAssignmentsModule } from './modules/parking/assignments/assignments.module';
 import { CalculationsModule as ParkingAssignmentCalculationsModule } from './modules/parking/assignments/calulations/calculations.module';
 import { StatusesModule as ParkingAssignmentStatusesModule } from './modules/parking/assignments/statuses/statuses.module';
@@ -12,6 +14,7 @@ import { SlotsModule as ParkingSlotsModule } from './modules/parking/slots/slots
 import { StatusesModule as ParkingSlotStatusesModule } from './modules/parking/slots/statuses/statuses.module';
 import { ProvincesModule } from './modules/provinces/provinces.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
+import { UsersModule } from './modules/users/users.module';
 import { BrandsModule as VehicleBrandsModule } from './modules/vehicles/brands/brands.module';
 import { TypesModule as VehicleTypesModule } from './modules/vehicles/types/types.module';
 import { VehiclesModule } from './modules/vehicles/vehicles.module';
@@ -21,6 +24,7 @@ import { RequestLoggerMiddleware } from './request-logger.middleware';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     CommonModule,
+    AuthModule,
     DatabaseModule,
     ParkingAssignmentCalculationsModule,
     ParkingAssignmentStatusesModule,
@@ -28,11 +32,17 @@ import { RequestLoggerMiddleware } from './request-logger.middleware';
     ParkingSlotStatusesModule,
     ParkingSlotsModule,
     ProvincesModule,
+    SupabaseModule,
     TenantsModule,
+    UsersModule,
     VehicleBrandsModule,
     VehicleTypesModule,
     VehiclesModule,
     RouterModule.register([
+      {
+        path: 'auth',
+        module: AuthModule,
+      },
       {
         path: 'parking',
         children: [

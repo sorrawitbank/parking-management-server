@@ -17,8 +17,8 @@ export class RequestLoggerMiddleware implements NestMiddleware {
       const duration = Date.now() - start;
       const message = `${method} ${originalUrl} ${statusCode} +${duration}ms - ${ip}`;
 
-      // Don't log successful requests in production
-      if (this.environmentService.isProd && statusCode < 400) {
+      // Don't log requests in production if status code is less than 500
+      if (this.environmentService.isProd && statusCode < 500) {
         return;
       }
 
