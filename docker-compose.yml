@@ -36,6 +36,19 @@ services:
       postgres:
         condition: service_healthy
 
+  redis:
+    image: redis:7-alpine
+    container_name: parking-redis
+    restart: unless-stopped
+    command: redis-server --save "" --appendonly no
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   dozzle:
     image: amir20/dozzle:latest
     container_name: parking-dozzle
@@ -46,3 +59,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
