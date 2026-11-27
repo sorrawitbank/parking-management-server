@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { NotFound } from '../../common/errors/throw';
+import { NotFound } from '../../common/errors';
 import { DATABASE_CONNECTION } from '../../database/database.constants';
 import { type Database } from '../../database/interfaces';
 

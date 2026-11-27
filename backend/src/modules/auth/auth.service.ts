@@ -1,7 +1,7 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { AuthError } from '@supabase/supabase-js';
 import { UsersService } from '../users/users.service';
-import { Unauthorized } from '../../common/errors/throw';
+import { Unauthorized } from '../../common/errors';
 import { EnvironmentService } from '../../common/services/environment.service';
 import { SupabaseAuthService } from '../../infrastructure/supabase/auth/supabase-auth.service';
 

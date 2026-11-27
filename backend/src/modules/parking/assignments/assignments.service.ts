@@ -15,7 +15,7 @@ import {
   Required,
   Unavailable,
   Unprocessable,
-} from '../../../common/errors/throw';
+} from '../../../common/errors';
 import { toStartOfDayUtc } from '../../../common/utils';
 import { DATABASE_CONNECTION } from '../../../database/database.constants';
 import {

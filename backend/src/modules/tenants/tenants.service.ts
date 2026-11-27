@@ -7,7 +7,7 @@ import {
   NotFound,
   Required,
   Unprocessable,
-} from '../../common/errors/throw';
+} from '../../common/errors';
 import { DATABASE_CONNECTION } from '../../database/database.constants';
 import { tenants } from '../../database/database.schemas';
 import { FindManyWhere, type Database } from '../../database/interfaces';

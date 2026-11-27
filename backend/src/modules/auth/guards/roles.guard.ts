@@ -8,7 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { UserRole } from '../../../common/enums/user-role.enum';
-import { Forbidden } from '../../../common/errors/throw';
+import { Forbidden } from '../../../common/errors';
 import { EnvironmentService } from '../../../common/services/environment.service';
 
 @Injectable()

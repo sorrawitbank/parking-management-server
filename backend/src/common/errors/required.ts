@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
-import ErrorType from '../../enums/error-type.enum';
-import { toScreamingSnake } from '../../utils';
+import ErrorType from '../enums/error-type.enum';
+import { toScreamingSnake } from '../utils';
 
 /**
  * Return a bad request exception with the properties and the error type

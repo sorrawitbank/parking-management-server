@@ -9,7 +9,7 @@ import { AuthError } from '@supabase/supabase-js';
 import { Request } from 'express';
 import { UsersService } from '../../users/users.service';
 import { UserRole } from '../../../common/enums/user-role.enum';
-import { Unauthorized } from '../../../common/errors/throw';
+import { Unauthorized } from '../../../common/errors';
 import { EnvironmentService } from '../../../common/services/environment.service';
 import { SupabaseAuthService } from '../../../infrastructure/supabase/auth/supabase-auth.service';
 

@@ -1,6 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
-import ErrorType from '../../enums/error-type.enum';
-import { toScreamingSnake } from '../../utils';
+import ErrorType from '../enums/error-type.enum';
+import { toScreamingSnake } from '../utils';
 
 /**
  * Return an unauthorized exception with the given type and properties
