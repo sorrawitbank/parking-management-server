@@ -5,7 +5,7 @@ import { addDays } from 'date-fns';
 import { SlotIdDto } from '../../slots/dto/slot-id.dto';
 import { TenantIdDto } from '../../../tenants/dto/tenant-id.dto';
 import { IsOnlyDate } from '../../../../common/decorators';
-import ErrorType from '../../../../common/errors/error-type.enum';
+import ErrorType from '../../../../common/enums/error-type.enum';
 import { toStartOfDayUtc } from '../../../../common/utils';
 
 export class CreateAssignmentDto extends IntersectionType(

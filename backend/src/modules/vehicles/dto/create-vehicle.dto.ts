@@ -13,7 +13,7 @@ import { TypeIdDto } from '../types/dto/type-id.dto';
 import { ProvinceIdDto } from '../../provinces/dto/province-id.dto';
 import { TenantIdDto } from '../../tenants/dto/tenant-id.dto';
 import { Trim } from '../../../common/decorators';
-import ErrorType from '../../../common/errors/error-type.enum';
+import ErrorType from '../../../common/enums/error-type.enum';
 
 export class CreateVehicleDto extends IntersectionType(
   TenantIdDto,

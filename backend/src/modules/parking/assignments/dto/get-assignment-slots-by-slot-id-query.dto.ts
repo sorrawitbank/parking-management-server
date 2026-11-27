@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, Min } from 'class-validator';
 import { IsCurrentYearOrBefore } from '../../../../common/decorators';
-import ErrorType from '../../../../common/errors/error-type.enum';
+import ErrorType from '../../../../common/enums/error-type.enum';
 
 export class GetAssignmentSlotsBySlotIdQueryDto {
   @IsCurrentYearOrBefore({ message: ErrorType.ABOVE_MAXIMUM })

@@ -2,7 +2,7 @@ import { PartialType, PickType } from '@nestjs/mapped-types';
 import { IsInt, IsOptional, Max, Min } from 'class-validator';
 import { CreateAssignmentDto } from './create-assignment.dto';
 import { SlotIdDto } from '../../slots/dto/slot-id.dto';
-import ErrorType from '../../../../common/errors/error-type.enum';
+import ErrorType from '../../../../common/enums/error-type.enum';
 
 export class UpdateAssignmentDto extends PartialType(
   PickType(CreateAssignmentDto, ['tenantId', 'monthlyFee'] as const),

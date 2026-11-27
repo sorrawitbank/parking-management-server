@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator';
 import { IsOnlyDate } from '../../../../../common/decorators';
-import ErrorType from '../../../../../common/errors/error-type.enum';
+import ErrorType from '../../../../../common/enums/error-type.enum';
 import { toStartOfDayUtc } from '../../../../../common/utils';
 
 export class GetCancelDataQueryDto {

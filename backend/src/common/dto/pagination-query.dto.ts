@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, Max, Min } from 'class-validator';
-import ErrorType from '../errors/error-type.enum';
+import ErrorType from '../enums/error-type.enum';
 
 export class PaginationQueryDto {
   @Min(1, { message: ErrorType.BELOW_MINIMUM })
