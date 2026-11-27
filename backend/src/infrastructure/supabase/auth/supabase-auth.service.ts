@@ -31,4 +31,25 @@ export class SupabaseAuthService {
 
     return data.user;
   }
+
+  async resetPassword(email: string, oldPassword: string, newPassword: string) {
+    const supabase = this.supabaseService.getAuthClient();
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password: oldPassword,
+    });
+
+    if (signInError) {
+      throw signInError;
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (updateError) {
+      throw updateError;
+    }
+  }
 }

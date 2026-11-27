@@ -54,4 +54,41 @@ export class AuthService {
       throw error;
     }
   }
+
+  async resetPassword(email: string, oldPassword: string, newPassword: string) {
+    try {
+      const user = await this.usersService.getUserByEmail(email);
+
+      if (!user.isActive) {
+        this.logger.warn(`User is not active for email: ${email}`);
+
+        throw Unauthorized('NOT_AUTHORIZED', 'email');
+      }
+
+      await this.supabaseAuthService.resetPassword(
+        email,
+        oldPassword,
+        newPassword,
+      );
+    } catch (error) {
+      if (error instanceof AuthError && error.code === 'invalid_credentials') {
+        if (!this.environmentService.isProd) {
+          this.logger.warn(`Invalid credentials for email: ${email}`);
+        }
+
+        throw Unauthorized('INVALID_CREDENTIALS', 'email', 'password');
+      } else if (error instanceof HttpException) {
+        if (error.getStatus() >= 500) {
+          this.logger.error(error);
+        } else if (!this.environmentService.isProd) {
+          this.logger.warn(error);
+        }
+
+        throw error;
+      }
+
+      this.logger.error(error);
+      throw error;
+    }
+  }
 }
