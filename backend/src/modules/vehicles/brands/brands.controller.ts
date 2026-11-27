@@ -1,9 +1,11 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { BrandResponseDto } from './dto/brand-response.dto';
 import { BrandsService } from './brands.service';
+import { AuthGuard } from '../../auth/guards/auth.guard';
 
 @Controller()
+@UseGuards(AuthGuard)
 export class BrandsController {
   constructor(private readonly brandsService: BrandsService) {}
 

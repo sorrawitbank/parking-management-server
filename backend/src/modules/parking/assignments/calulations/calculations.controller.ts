@@ -1,12 +1,14 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { CalculationsService } from './calculations.service';
 import { GetCancelDataQueryDto } from './dto/get-cancel-data-query.dto';
 import { GetCancelDataResponseDto } from './dto/get-cancel-data-response.dto';
 import { GetRentDataQueryDto } from './dto/get-rent-data-query.dto';
 import { GetRentDataResponseDto } from './dto/get-rent-data-response.dto';
+import { AuthGuard } from '../../../auth/guards/auth.guard';
 
 @Controller()
+@UseGuards(AuthGuard)
 export class CalculationsController {
   constructor(private readonly calculationsService: CalculationsService) {}
 

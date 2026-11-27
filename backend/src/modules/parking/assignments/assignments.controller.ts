@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { AssignmentsService } from './assignments.service';
@@ -42,9 +43,11 @@ import {
   UpdateAssignmentResponseDto,
 } from './dto/update-assignment-response.dto';
 import { SlotIdDto } from '../slots/dto/slot-id.dto';
+import { AuthGuard } from '../../auth/guards/auth.guard';
 import { TenantIdDto } from '../../tenants/dto/tenant-id.dto';
 
 @Controller()
+@UseGuards(AuthGuard)
 export class AssignmentsController {
   constructor(private readonly assignmentsService: AssignmentsService) {}
 

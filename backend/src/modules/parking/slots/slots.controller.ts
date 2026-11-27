@@ -1,10 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { GetSlotWithStatusResponseDto } from './dto/get-slot-with-status-response.dto';
 import { SlotResponseDto } from './dto/slot-response.dto';
 import { SlotsService } from './slots.service';
+import { AuthGuard } from '../../auth/guards/auth.guard';
 
 @Controller()
+@UseGuards(AuthGuard)
 export class SlotsController {
   constructor(private readonly slotsService: SlotsService) {}
 

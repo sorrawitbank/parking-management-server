@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { CreateTenantResponseDto } from './dto/create-tenant-response.dto';
@@ -23,8 +24,10 @@ import { TenantIdDto } from './dto/tenant-id.dto';
 import { UpdateTenantResponseDto } from './dto/update-tenant-response.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { TenantsService } from './tenants.service';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 @Controller()
+@UseGuards(AuthGuard)
 export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 

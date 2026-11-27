@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { CreateVehicleResponseDto } from './dto/create-vehicle-response.dto';
@@ -23,8 +24,10 @@ import { UpdateVehicleResponseDto } from './dto/update-vehicle-response.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { VehicleIdDto } from './dto/vehicle-id.dto';
 import { VehiclesService } from './vehicles.service';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 @Controller()
+@UseGuards(AuthGuard)
 export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}
 
