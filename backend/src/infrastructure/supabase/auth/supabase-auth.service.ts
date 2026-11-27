@@ -6,7 +6,7 @@ export class SupabaseAuthService {
   constructor(private readonly supabaseService: SupabaseService) {}
 
   async signIn(email: string, password: string) {
-    const supabase = this.supabaseService.getAuthClient();
+    const supabase = this.supabaseService.createAuthClient();
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -21,7 +21,7 @@ export class SupabaseAuthService {
   }
 
   async getUser(accessToken: string) {
-    const supabase = this.supabaseService.getAuthClient();
+    const supabase = this.supabaseService.createAuthClient();
 
     const { data, error } = await supabase.auth.getUser(accessToken);
 
@@ -33,7 +33,7 @@ export class SupabaseAuthService {
   }
 
   async resetPassword(email: string, oldPassword: string, newPassword: string) {
-    const supabase = this.supabaseService.getAuthClient();
+    const supabase = this.supabaseService.createAuthClient();
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
