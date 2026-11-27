@@ -20,4 +20,18 @@ export class UsersService {
 
     return user;
   }
+
+  async getUserByEmail(email: string) {
+    const user = await this.db.query.users.findFirst({
+      where: {
+        email: { eq: email },
+      },
+    });
+
+    if (!user) {
+      throw NotFound('user');
+    }
+
+    return user;
+  }
 }
